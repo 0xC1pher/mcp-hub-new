@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Logs
+*.log
+logs/
+
+# Environment variables
+.env
+
+# IDE specific files
+.vscode/
+.idea/
+
+# Local development
+*.swp
+*.swo
+
+# Cache
+dist/
+build/
+*.egg-info/
+
+# System Files
+.DS_Store
+Thumbs.db

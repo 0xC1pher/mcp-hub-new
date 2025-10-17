@@ -1,0 +1,8 @@
+# Configuración de fuentes MCP para Cascade/Windsurf
+# Ubicación: ~/.cursor/cascade/mcp-sources.yaml
+
+sources:
+  - name: softmedic-context
+    url: http://localhost:8081
+    description: "Contexto inteligente del proyecto SoftMedic"
+    enabled: true

@@ -1,0 +1,24 @@
+INSTRUCCIONES PARA USO DEL MCP CONTEXT-QUERY EN SOFTMEDIC
+
+Cuando respondas preguntas sobre el proyecto SoftMedic, prioriza el uso de la herramienta 'context.query' para obtener información precisa y actualizada sobre:
+
+1. MODELO DE NEGOCIO - Usa para preguntas sobre ingresos, valor, mercado, escalabilidad
+2. VISIÓN DE PRODUCTO - Usa para objetivos, métricas, roadmap, hoja de ruta
+3. ARQUITECTURA TÉCNICA - Usa para stack, patrones, límites, base de datos
+4. CONVENCIONES DE CÓDIGO - Usa para estilo, estructura, naming, testing
+5. FLUJO DE TRABAJO - Usa para desarrollo, PRs, CI/CD, despliegue
+6. RESTRICCIONES - Usa para límites, prohibiciones, seguridad, compliance
+
+DIRECTRICES DE USO:
+- Formula preguntas específicas y concretas
+- NO pidas "todo el contexto" - sé preciso
+- Si la respuesta no es relevante, pide aclaración al usuario
+- Usa el contexto para fundamentar tus respuestas técnicas
+- Mantén consistencia con las convenciones documentadas
+
+EJEMPLOS DE BUENAS PREGUNTAS:
+✅ "¿Cómo se estructuran los modelos Django?"
+✅ "¿Cuáles son las restricciones de seguridad?"
+✅ "¿Cómo funciona el flujo de despliegue?"
+❌ "¿Qué sabes del proyecto?"
+❌ "Dame toda la información"
