@@ -1,20 +1,151 @@
 {
-  "name": "context-query",
-  "version": "1.1.0",
+  "name": "context-query-enhanced",
+  "version": "2.0.0",
   "metadata": {
-    "description": "Servidor MCP ligero que provee contexto semántico del proyecto SoftMedic.",
+    "description": "Servidor MCP mejorado con Context Feedback System que previene alucinaciones y mantiene coherencia del proyecto.",
     "healthcheck": "/health",
-    "maintainer": "SoftMedic Team"
+    "maintainer": "SoftMedic Team",
+    "features": [
+      "Prevención de alucinaciones",
+      "Análisis de código existente obligatorio",
+      "Gestión de tareas con retroalimentación",
+      "Detección de duplicación de código",
+      "Ciclo de retroalimentación 2→1→contexto"
+    ]
   },
   "tools": [
     {
       "name": "context_query",
-      "description": "Obtiene fragmentos relevantes del contexto del proyecto basado en una consulta semántica.",
+      "description": "Obtiene fragmentos relevantes del contexto del proyecto con verificaciones anti-alucinación.",
       "inputSchema": {
-        "$ref": "shared/schemas/context-query.schema.json"
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Consulta sobre el contexto del proyecto"
+          }
+        },
+        "required": ["query"]
       },
       "outputSchema": {
-        "type": "string"
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {"type": "string"},
+                "text": {"type": "string"}
+              }
+            }
+          },
+          "context_metadata": {
+            "type": "object",
+            "properties": {
+              "compliance_check": {"type": "object"},
+              "query_count": {"type": "number"},
+              "feature_requirements_checked": {"type": "boolean"}
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "analyze_code",
+      "description": "Analiza código existente para prevenir duplicación y mantener coherencia arquitectural.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Ruta del directorio a analizar (opcional, por defecto analiza todo el proyecto)"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {"type": "string"},
+                "text": {"type": "string"}
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "create_task",
+      "description": "Crea una nueva tarea con análisis de contexto previo y verificación de dependencias.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "Descripción detallada de la tarea a realizar"
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical"],
+            "description": "Prioridad de la tarea",
+            "default": "medium"
+          },
+          "dependencies": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "IDs de tareas que deben completarse antes de esta"
+          }
+        },
+        "required": ["content"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {"type": "string"},
+                "text": {"type": "string"}
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "process_tasks",
+      "description": "Procesa tareas pendientes con retroalimentación de contexto (ciclo 2 tareas → contexto → 1 tarea → contexto).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "max_tasks": {
+            "type": "number",
+            "description": "Número máximo de tareas a procesar",
+            "default": 10
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {"type": "string"},
+                "text": {"type": "string"}
+              }
+            }
+          }
+        }
       }
     }
   ]
