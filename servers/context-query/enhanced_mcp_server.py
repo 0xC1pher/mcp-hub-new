@@ -12,11 +12,25 @@ import time
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
-# Importar el sistema de retroalimentación
-from context_feedback_system import ContextFeedbackSystem, TaskPriority
-from optimized_mcp_server import OptimizedMCPContextServer
-
 logger = logging.getLogger(__name__)
+
+# Importar el sistema de retroalimentación
+try:
+    from context_feedback_system import ContextFeedbackSystem, TaskPriority
+    from optimized_mcp_server import OptimizedMCPContextServer
+    FEEDBACK_AVAILABLE = True
+    logger.info("Context Feedback System cargado correctamente")
+except ImportError as e:
+    logger.warning(f"Context Feedback System no disponible: {e}")
+    from optimized_mcp_server import OptimizedMCPContextServer
+    FEEDBACK_AVAILABLE = False
+    
+    # Crear clases dummy para compatibilidad
+    class TaskPriority:
+        HIGH = "high"
+        MEDIUM = "medium"
+        LOW = "low"
+        CRITICAL = "critical"
 
 class EnhancedMCPServer(OptimizedMCPContextServer):
     """Servidor MCP mejorado con sistema de retroalimentación de contexto"""
@@ -24,24 +38,36 @@ class EnhancedMCPServer(OptimizedMCPContextServer):
     def __init__(self):
         super().__init__()
         
-        # Inicializar sistema de retroalimentación
-        project_root = Path(__file__).parent
-        self.feedback_system = ContextFeedbackSystem(str(project_root))
+        # Inicializar sistema de retroalimentación si está disponible
+        if FEEDBACK_AVAILABLE:
+            project_root = Path(__file__).parent
+            self.feedback_system = ContextFeedbackSystem(str(project_root))
+            logger.info("Enhanced MCP Server inicializado con Context Feedback System")
+        else:
+            self.feedback_system = None
+            logger.info("Enhanced MCP Server inicializado SIN Context Feedback System (modo compatibilidad)")
         
         # Contador de consultas para gestión de tareas
         self.query_count = 0
         self.context_review_threshold = 2
-        
-        logger.info("Enhanced MCP Server inicializado con Context Feedback System")
     
     def handle_tools_call(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """Maneja llamadas a herramientas con retroalimentación de contexto"""
         
-        # REGLA PRIORITARIA: Leer feature.md antes de procesar
-        feature_requirements = self.feedback_system.read_feature_requirements()
-        
         tool_name = params.get("name")
         arguments = params.get("arguments", {})
+        
+        # Si el feedback system no está disponible, usar solo el servidor optimizado
+        if not FEEDBACK_AVAILABLE or self.feedback_system is None:
+            logger.info(f"Procesando herramienta en modo compatibilidad: {tool_name}")
+            return super().handle_tools_call(params)
+        
+        # REGLA PRIORITARIA: Leer feature.md antes de procesar
+        try:
+            feature_requirements = self.feedback_system.read_feature_requirements()
+        except Exception as e:
+            logger.warning(f"Error leyendo feature.md: {e}")
+            feature_requirements = {}
         
         logger.info(f"Procesando herramienta con feedback: {tool_name}")
         

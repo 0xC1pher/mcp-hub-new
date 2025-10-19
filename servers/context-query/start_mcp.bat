@@ -27,7 +27,7 @@ echo Iniciando servidor...
 echo Presiona Ctrl+C para detener el servidor.
 echo.
 
-python simple_mcp_server.py
+python enhanced_mcp_server.py
 
 echo.
 echo Servidor detenido.
