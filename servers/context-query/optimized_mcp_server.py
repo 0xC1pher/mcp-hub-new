@@ -324,7 +324,8 @@ class MultiLevelCache:
 class QueryOptimizer:
     """Optimización de consultas con expansión semántica"""
     
-    def __init__(self):
+    def __init__(self, cache=None):
+        self.cache = cache  # Inyección de dependencia del cache
         # Sinónimos específicos del dominio médico y SoftMedic
         self.synonyms = {
             # Términos médicos
@@ -1122,7 +1123,7 @@ class OptimizedMCPContextServer:
         self.token_budget = TokenBudgetManager()
         self.semantic_chunker = SemanticChunker()
         self.cache = MultiLevelCache()
-        self.query_optimizer = QueryOptimizer()
+        self.query_optimizer = QueryOptimizer(cache=self.cache)
         self.rate_limiter = RateLimiter()
         self.resource_monitor = ResourceMonitor()
         self.fuzzy_search = FuzzySearch()
@@ -1498,99 +1499,3 @@ class OptimizedMCPContextServer:
 if __name__ == "__main__":
     server = OptimizedMCPContextServer()
     server.run()
-
-    def check_semantic_cache(self, query: str, similarity_threshold: float = 0.8) -> Optional[Dict[str, Any]]:
-        """Verifica el caché semántico para consultas similares"""
-        query_normalized = self.normalize_query(query)
-        
-        # Buscar en caché por coincidencia exacta primero
-        exact_match = self.cache.get(f"query:{query_normalized}")
-        if exact_match and not self._is_cache_expired(exact_match):
-            return exact_match
-        
-        # Buscar coincidencias semánticas
-        for cached_key in self.cache.l1_cache.keys():
-            if cached_key.startswith("query:"):
-                cached_query = cached_key[6:]  # Remover prefijo "query:"
-                similarity = self._calculate_semantic_similarity(query_normalized, cached_query)
-                
-                if similarity >= similarity_threshold:
-                    cached_result = self.cache.get(cached_key)
-                    if cached_result and not self._is_cache_expired(cached_result):
-                        # Actualizar estadísticas de hit semántico
-                        cached_result['semantic_hit'] = True
-                        cached_result['similarity_score'] = similarity
-                        return cached_result
-        
-        return None
-    
-    def _calculate_semantic_similarity(self, query1: str, query2: str) -> float:
-        """Calcula similitud semántica entre dos consultas"""
-        # Tokenizar y normalizar
-        tokens1 = set(self._extract_keywords(query1))
-        tokens2 = set(self._extract_keywords(query2))
-        
-        if not tokens1 or not tokens2:
-            return 0.0
-        
-        # Similitud de Jaccard básica
-        intersection = len(tokens1.intersection(tokens2))
-        union = len(tokens1.union(tokens2))
-        jaccard_similarity = intersection / union if union > 0 else 0.0
-        
-        # Expandir con sinónimos para mejor comparación
-        expanded_tokens1 = self._expand_tokens_with_synonyms(tokens1)
-        expanded_tokens2 = self._expand_tokens_with_synonyms(tokens2)
-        
-        # Similitud expandida
-        expanded_intersection = len(expanded_tokens1.intersection(expanded_tokens2))
-        expanded_union = len(expanded_tokens1.union(expanded_tokens2))
-        expanded_similarity = expanded_intersection / expanded_union if expanded_union > 0 else 0.0
-        
-        # Combinar ambas métricas (70% Jaccard, 30% expandida)
-        final_similarity = (jaccard_similarity * 0.7) + (expanded_similarity * 0.3)
-        
-        return final_similarity
-    
-    def _expand_tokens_with_synonyms(self, tokens: Set[str]) -> Set[str]:
-        """Expande tokens con sinónimos para mejor comparación semántica"""
-        expanded = set(tokens)
-        
-        for token in tokens:
-            if token in self.synonyms:
-                expanded.update(self.synonyms[token])
-            
-            # Buscar token como sinónimo en otros grupos
-            for main_term, synonyms in self.synonyms.items():
-                if token in synonyms:
-                    expanded.add(main_term)
-                    expanded.update(synonyms)
-        
-        return expanded
-    
-    def _is_cache_expired(self, cached_item: Dict[str, Any]) -> bool:
-        """Verifica si un elemento del caché ha expirado"""
-        if 'timestamp' not in cached_item or 'ttl' not in cached_item:
-            return True
-        
-        current_time = time.time()
-        expiry_time = cached_item['timestamp'] + cached_item['ttl']
-        
-        return current_time > expiry_time
-    
-    def normalize_query(self, query: str) -> str:
-        """Normaliza consulta para consistencia"""
-        # Convertir a minúsculas
-        normalized = query.lower().strip()
-        
-        # Remover espacios múltiples
-        normalized = re.sub(r'\s+', ' ', normalized)
-        
-        # Remover caracteres especiales excepto espacios y guiones
-        normalized = re.sub(r'[^\w\s\-]', '', normalized)
-        
-        # Ordenar palabras para consistencia (opcional, puede afectar el contexto)
-        # words = normalized.split()
-        # normalized = ' '.join(sorted(words))
-        
-        return normalized
