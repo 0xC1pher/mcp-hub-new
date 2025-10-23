@@ -8,6 +8,7 @@ y mantener coherencia del proyecto.
 import json
 import sys
 import logging
+import re
 import time
 from pathlib import Path
 from typing import Dict, Any, List, Optional
@@ -34,6 +35,416 @@ except ImportError as e:
         MEDIUM = "medium"
         LOW = "low"
         CRITICAL = "critical"
+
+
+class HallucinationDetector:
+    """Detector de alucinaciones para prevenir respuestas incorrectas"""
+    
+    def __init__(self):
+        self.known_facts = {}  # Base de conocimiento verificada
+        self.suspicious_patterns = [
+            r'definitivamente',
+            r'siempre es',
+            r'nunca falla',
+            r'garantizado que',
+            r'imposible que'
+        ]
+        self.context_inconsistencies = []
+    
+    def detect_hallucination_risks(self, query: str, context: str, proposed_response: str = "") -> Dict:
+        """Detecta riesgos de alucinación en la respuesta"""
+        risks = {
+            'confidence_level': 'medium',
+            'risk_factors': [],
+            'recommendations': [],
+            'context_gaps': []
+        }
+        
+        # Detectar patrones sospechosos
+        for pattern in self.suspicious_patterns:
+            if re.search(pattern, proposed_response.lower()):
+                risks['risk_factors'].append(f'absolute_statement: {pattern}')
+        
+        # Detectar falta de contexto
+        if len(context.strip()) < 100:
+            risks['context_gaps'].append('insufficient_context')
+            risks['confidence_level'] = 'low'
+        
+        # Detectar query ambigua
+        if len(query.split()) < 3:
+            risks['risk_factors'].append('ambiguous_query')
+        
+        # Generar recomendaciones
+        if risks['risk_factors'] or risks['context_gaps']:
+            risks['recommendations'] = self._generate_safety_recommendations(risks)
+        
+        return risks
+    
+    def _generate_safety_recommendations(self, risks: Dict) -> List[str]:
+        """Genera recomendaciones para reducir riesgos"""
+        recommendations = []
+        
+        if 'insufficient_context' in risks['context_gaps']:
+            recommendations.append('request_more_context')
+            recommendations.append('acknowledge_limitations')
+        
+        if any('absolute_statement' in rf for rf in risks['risk_factors']):
+            recommendations.append('use_qualified_language')
+            recommendations.append('provide_alternatives')
+        
+        return recommendations
+
+
+class ContextValidator:
+    """Validador de contexto para asegurar coherencia"""
+    
+    def __init__(self):
+        self.context_history = []
+        self.validation_rules = {
+            'min_context_length': 50,
+            'max_context_age': 3600,  # 1 hora
+            'required_sections': ['description', 'examples']
+        }
+    
+    def validate_context_quality(self, context: str, metadata: Dict = None) -> Dict:
+        """Valida la calidad del contexto proporcionado"""
+        validation = {
+            'is_valid': True,
+            'quality_score': 0.0,
+            'issues': [],
+            'improvements': []
+        }
+        
+        # Validar longitud mínima
+        if len(context.strip()) < self.validation_rules['min_context_length']:
+            validation['issues'].append('context_too_short')
+            validation['is_valid'] = False
+        
+        # Validar estructura del contexto
+        structure_score = self._assess_context_structure(context)
+        validation['quality_score'] += structure_score * 0.4
+        
+        # Validar relevancia del contexto
+        relevance_score = self._assess_context_relevance(context, metadata)
+        validation['quality_score'] += relevance_score * 0.6
+        
+        # Generar mejoras sugeridas
+        if validation['quality_score'] < 0.7:
+            validation['improvements'] = self._suggest_context_improvements(context)
+        
+        return validation
+    
+    def _assess_context_structure(self, context: str) -> float:
+        """Evalúa la estructura del contexto"""
+        score = 0.0
+        
+        # Puntos por tener código estructurado
+        if re.search(r'(class|def|function)', context):
+            score += 0.3
+        
+        # Puntos por tener documentación
+        if re.search(r'(""".*?"""|#.*)', context, re.DOTALL):
+            score += 0.2
+        
+        # Puntos por tener ejemplos
+        if 'example' in context.lower() or '```' in context:
+            score += 0.3
+        
+        # Puntos por organización clara
+        if re.search(r'(#{1,3}\s+|^\s*\d+\.)', context, re.MULTILINE):
+            score += 0.2
+        
+        return min(1.0, score)
+    
+    def _assess_context_relevance(self, context: str, metadata: Dict = None) -> float:
+        """Evalúa la relevancia del contexto"""
+        if not metadata:
+            return 0.5
+        
+        query = metadata.get('query', '')
+        if not query:
+            return 0.5
+        
+        # Calcular overlapping de keywords
+        context_words = set(re.findall(r'\w+', context.lower()))
+        query_words = set(re.findall(r'\w+', query.lower()))
+        
+        if not query_words:
+            return 0.5
+        
+        overlap = len(context_words & query_words) / len(query_words)
+        return min(1.0, overlap * 2)  # Multiplicar por 2 para dar más peso
+    
+    def _suggest_context_improvements(self, context: str) -> List[str]:
+        """Sugiere mejoras para el contexto"""
+        improvements = []
+        
+        if len(context) < 200:
+            improvements.append('add_more_detail')
+        
+        if not re.search(r'(example|ejemplo)', context.lower()):
+            improvements.append('add_examples')
+        
+        if not re.search(r'(""".*?"""|#.*)', context, re.DOTALL):
+            improvements.append('add_documentation')
+        
+        return improvements
+
+
+class ModelGuidanceEngine:
+    """Motor de guía para el modelo para respuestas más precisas"""
+    
+    def __init__(self):
+        self.guidance_templates = {
+            'code_generation': {
+                'structure': ['analysis', 'implementation', 'testing', 'documentation'],
+                'avoid': ['hardcoded_values', 'missing_error_handling'],
+                'include': ['type_hints', 'docstrings', 'examples']
+            },
+            'explanation': {
+                'structure': ['overview', 'details', 'examples', 'summary'],
+                'avoid': ['technical_jargon_without_explanation'],
+                'include': ['step_by_step', 'visual_aids', 'analogies']
+            },
+            'debugging': {
+                'structure': ['problem_identification', 'root_cause', 'solution', 'prevention'],
+                'avoid': ['assumptions_without_verification'],
+                'include': ['debugging_steps', 'testing_approach']
+            }
+        }
+    
+    def generate_guidance(self, query: str, context: str, intent: str = 'general') -> Dict:
+        """Genera guías específicas para el modelo"""
+        guidance = {
+            'response_structure': [],
+            'focus_areas': [],
+            'avoid_patterns': [],
+            'quality_checks': [],
+            'context_preservation': {}
+        }
+        
+        # Obtener template basado en intención
+        template = self.guidance_templates.get(intent, {})
+        
+        if template:
+            guidance['response_structure'] = template.get('structure', [])
+            guidance['avoid_patterns'] = template.get('avoid', [])
+            guidance['quality_checks'] = template.get('include', [])
+        
+        # Analizar áreas de enfoque específicas
+        guidance['focus_areas'] = self._identify_focus_areas(query, context)
+        
+        # Reglas de preservación de contexto
+        guidance['context_preservation'] = self._get_preservation_rules(context)
+        
+        return guidance
+    
+    def _identify_focus_areas(self, query: str, context: str) -> List[str]:
+        """Identifica áreas específicas de enfoque"""
+        focus_areas = []
+        
+        # Extraer conceptos clave del query
+        query_concepts = re.findall(r'\b[A-Z][a-zA-Z]+\b|\b[a-z_]+[a-z]\b', query)
+        
+        # Extraer conceptos del contexto
+        context_concepts = re.findall(r'class\s+(\w+)|def\s+(\w+)|(\w+)\s*=', context)
+        context_concepts = [c for group in context_concepts for c in group if c]
+        
+        # Intersección de conceptos
+        common_concepts = set(query_concepts) & set(context_concepts)
+        focus_areas.extend(list(common_concepts)[:5])
+        
+        return focus_areas
+    
+    def _get_preservation_rules(self, context: str) -> Dict:
+        """Obtiene reglas para preservar el contexto existente"""
+        rules = {
+            'coding_style': 'maintain_existing',
+            'naming_convention': 'follow_existing',
+            'documentation_style': 'match_existing',
+            'error_handling': 'preserve_patterns'
+        }
+        
+        # Detectar estilo de código existente
+        if context.count("'") > context.count('"'):
+            rules['quote_style'] = 'single_quotes'
+        elif context.count('"') > context.count("'"):
+            rules['quote_style'] = 'double_quotes'
+        
+        # Detectar patrón de indentación
+        if '\t' in context:
+            rules['indentation'] = 'tabs'
+        elif '    ' in context:
+            rules['indentation'] = 'spaces'
+        
+        return rules
+
+
+class ResponseQualityMonitor:
+    """Monitor de calidad de respuestas para mejora continua"""
+    
+    def __init__(self):
+        self.quality_metrics = {
+            'accuracy': 0.0,
+            'completeness': 0.0,
+            'clarity': 0.0,
+            'relevance': 0.0
+        }
+        self.response_history = []
+    
+    def evaluate_response_quality(self, query: str, context: str, response: str) -> Dict:
+        """Evalúa la calidad de una respuesta"""
+        evaluation = {
+            'overall_score': 0.0,
+            'metrics': {},
+            'strengths': [],
+            'improvements': [],
+            'confidence': 'medium'
+        }
+        
+        # Evaluar métricas individuales
+        evaluation['metrics']['relevance'] = self._assess_relevance(query, response)
+        evaluation['metrics']['completeness'] = self._assess_completeness(query, response)
+        evaluation['metrics']['clarity'] = self._assess_clarity(response)
+        evaluation['metrics']['accuracy'] = self._assess_accuracy(context, response)
+        
+        # Calcular score general
+        weights = {'relevance': 0.3, 'completeness': 0.25, 'clarity': 0.2, 'accuracy': 0.25}
+        evaluation['overall_score'] = sum(
+            evaluation['metrics'][metric] * weight 
+            for metric, weight in weights.items()
+        )
+        
+        # Determinar confianza
+        if evaluation['overall_score'] >= 0.8:
+            evaluation['confidence'] = 'high'
+        elif evaluation['overall_score'] <= 0.5:
+            evaluation['confidence'] = 'low'
+        
+        # Identificar fortalezas y mejoras
+        evaluation['strengths'] = self._identify_strengths(evaluation['metrics'])
+        evaluation['improvements'] = self._identify_improvements(evaluation['metrics'])
+        
+        return evaluation
+    
+    def _assess_relevance(self, query: str, response: str) -> float:
+        """Evalúa qué tan relevante es la respuesta al query"""
+        query_words = set(re.findall(r'\w+', query.lower()))
+        response_words = set(re.findall(r'\w+', response.lower()))
+        
+        if not query_words:
+            return 0.5
+        
+        overlap = len(query_words & response_words) / len(query_words)
+        return min(1.0, overlap * 1.5)
+    
+    def _assess_completeness(self, query: str, response: str) -> float:
+        """Evalúa qué tan completa es la respuesta"""
+        # Heurística basada en longitud y estructura
+        base_score = min(1.0, len(response) / 500)  # Normalizar por longitud esperada
+        
+        # Bonus por estructura organizada
+        if re.search(r'(#{1,3}|\d+\.|\*\s)', response):
+            base_score += 0.2
+        
+        # Bonus por incluir ejemplos
+        if '```' in response or 'example' in response.lower():
+            base_score += 0.2
+        
+        return min(1.0, base_score)
+    
+    def _assess_clarity(self, response: str) -> float:
+        """Evalúa la claridad de la respuesta"""
+        # Métricas de legibilidad básicas
+        sentences = len(re.split(r'[.!?]+', response))
+        words = len(response.split())
+        
+        if sentences == 0:
+            return 0.0
+        
+        avg_sentence_length = words / sentences
+        
+        # Penalizar oraciones muy largas o muy cortas
+        if 10 <= avg_sentence_length <= 25:
+            clarity_score = 0.8
+        else:
+            clarity_score = 0.5
+        
+        # Bonus por uso de formateo
+        if any(marker in response for marker in ['**', '*', '`', '```']):
+            clarity_score += 0.2
+        
+        return min(1.0, clarity_score)
+    
+    def _assess_accuracy(self, context: str, response: str) -> float:
+        """Evalúa la precisión basada en el contexto"""
+        # Verificar que no se contradiga el contexto
+        context_facts = self._extract_facts(context)
+        response_facts = self._extract_facts(response)
+        
+        if not context_facts:
+            return 0.7  # Score neutral si no hay contexto para verificar
+        
+        # Verificar consistencia
+        contradictions = 0
+        for fact in response_facts:
+            if any(self._facts_contradict(fact, cf) for cf in context_facts):
+                contradictions += 1
+        
+        if contradictions == 0:
+            return 1.0
+        else:
+            return max(0.0, 1.0 - (contradictions / len(response_facts)))
+    
+    def _extract_facts(self, text: str) -> List[str]:
+        """Extrae 'hechos' básicos del texto"""
+        # Simplificado: extraer declaraciones que parecen hechos
+        facts = []
+        
+        # Buscar patrones como "X es Y", "X tiene Y", etc.
+        fact_patterns = [
+            r'(\w+)\s+(?:es|is)\s+(\w+)',
+            r'(\w+)\s+(?:tiene|has)\s+(\w+)',
+            r'(\w+)\s*=\s*(\w+)'
+        ]
+        
+        for pattern in fact_patterns:
+            matches = re.findall(pattern, text.lower())
+            facts.extend([f"{m[0]} -> {m[1]}" for m in matches])
+        
+        return facts
+    
+    def _facts_contradict(self, fact1: str, fact2: str) -> bool:
+        """Verifica si dos hechos se contradicen"""
+        # Simplificado: verificar si hablan del mismo sujeto pero con predicados diferentes
+        parts1 = fact1.split(' -> ')
+        parts2 = fact2.split(' -> ')
+        
+        if len(parts1) == 2 and len(parts2) == 2:
+            return parts1[0] == parts2[0] and parts1[1] != parts2[1]
+        
+        return False
+    
+    def _identify_strengths(self, metrics: Dict) -> List[str]:
+        """Identifica fortalezas de la respuesta"""
+        strengths = []
+        
+        for metric, score in metrics.items():
+            if score >= 0.8:
+                strengths.append(f"high_{metric}")
+        
+        return strengths
+    
+    def _identify_improvements(self, metrics: Dict) -> List[str]:
+        """Identifica áreas de mejora"""
+        improvements = []
+        
+        for metric, score in metrics.items():
+            if score < 0.6:
+                improvements.append(f"improve_{metric}")
+        
+        return improvements
+
 
 class EnhancedMCPServer(OptimizedMCPContextServer):
     """Servidor MCP mejorado con sistema de retroalimentación de contexto"""
@@ -95,6 +506,12 @@ class EnhancedMCPServer(OptimizedMCPContextServer):
         # Contador de consultas para gestión de tareas
         self.query_count = 0
         self.context_review_threshold = 2
+        
+        # Sistema de feedback mejorado para prevención de alucinaciones
+        self.hallucination_detector = HallucinationDetector()
+        self.context_validator = ContextValidator()
+        self.model_guidance_engine = ModelGuidanceEngine()
+        self.response_quality_monitor = ResponseQualityMonitor()
     
     def handle_tools_call(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """Maneja llamadas a herramientas con retroalimentación de contexto"""

@@ -1,0 +1,79 @@
+{
+  "name": "memory-context-mcp",
+  "version": "1.0.0",
+  "description": "Memory Context MCP - Solo manejo de contexto de memoria sin modelo de negocio",
+  "protocolVersion": "2024-11-05",
+  "capabilities": {
+    "tools": {
+      "store_context": {
+        "description": "Almacena contexto de memoria comprimido",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "context_data": {
+              "type": "object",
+              "description": "Datos del contexto a almacenar"
+            }
+          },
+          "required": ["context_data"]
+        }
+      },
+      "retrieve_context": {
+        "description": "Recupera contexto por hash",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "context_hash": {
+              "type": "string",
+              "description": "Hash del contexto a recuperar"
+            }
+          },
+          "required": ["context_hash"]
+        }
+      },
+      "search_contexts": {
+        "description": "Busca contextos por contenido",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "Texto a buscar en contextos"
+            },
+            "limit": {
+              "type": "number",
+              "description": "Límite de resultados",
+              "default": 10
+            }
+          },
+          "required": ["query"]
+        }
+      },
+      "get_stats": {
+        "description": "Obtiene estadísticas del almacenamiento",
+        "inputSchema": {
+          "type": "object",
+          "properties": {}
+        }
+      },
+      "cleanup_contexts": {
+        "description": "Limpia contextos antiguos",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "max_age_days": {
+              "type": "number",
+              "description": "Máxima antigüedad en días",
+              "default": 30
+            },
+            "min_access_count": {
+              "type": "number",
+              "description": "Mínimo número de accesos",
+              "default": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}

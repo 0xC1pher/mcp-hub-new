@@ -133,6 +133,324 @@ class TokenBudgetManager:
         
         return '\n\n'.join(truncated) + '\n\n[... contenido truncado ...]'
 
+class CacheIndexingSystem:
+    """Sistema de indexado inteligente para cache multinivel"""
+    
+    def __init__(self):
+        self.l1_index = {}  # Hash -> metadata rápida
+        self.l2_index = {}  # Índice semántico
+        self.disk_index = {}  # Índice persistente
+        self.semantic_vectors = {}  # Vectores semánticos para búsqueda
+        self.access_patterns = defaultdict(int)  # Patrones de acceso
+        
+    def index_content(self, content_hash: str, content: str, metadata: Dict) -> None:
+        """Indexa contenido en todos los niveles de cache"""
+        # L1: Índice rápido por hash
+        self.l1_index[content_hash] = {
+            'size': len(content),
+            'type': self._detect_content_type(content),
+            'keywords': self._extract_keywords(content),
+            'timestamp': time.time(),
+            'access_count': 0
+        }
+        
+        # L2: Índice semántico
+        semantic_signature = self._generate_semantic_signature(content)
+        self.l2_index[content_hash] = semantic_signature
+        
+        # Disk: Índice persistente (solo metadatos críticos)
+        self.disk_index[content_hash] = {
+            'path': metadata.get('path', ''),
+            'last_modified': metadata.get('last_modified', time.time()),
+            'priority_score': self._calculate_priority_score(content, metadata)
+        }
+    
+    def find_similar_content(self, query_content: str, threshold: float = 0.8) -> List[str]:
+        """Encuentra contenido similar usando semántica"""
+        query_signature = self._generate_semantic_signature(query_content)
+        similar_hashes = []
+        
+        for content_hash, signature in self.l2_index.items():
+            similarity = self._calculate_semantic_similarity(query_signature, signature)
+            if similarity >= threshold:
+                similar_hashes.append((content_hash, similarity))
+        
+        # Ordenar por similitud descendente
+        similar_hashes.sort(key=lambda x: x[1], reverse=True)
+        return [hash_val for hash_val, _ in similar_hashes[:10]]
+    
+    def get_cache_recommendations(self, query: str) -> List[str]:
+        """Recomienda contenido del cache basado en query"""
+        query_keywords = self._extract_keywords(query.lower())
+        recommendations = []
+        
+        for content_hash, metadata in self.l1_index.items():
+            score = 0
+            content_keywords = metadata.get('keywords', [])
+            
+            # Score por keywords coincidentes
+            common_keywords = set(query_keywords) & set(content_keywords)
+            score += len(common_keywords) * 2
+            
+            # Score por patrones de acceso
+            score += self.access_patterns[content_hash] * 0.1
+            
+            # Score por recencia
+            age_hours = (time.time() - metadata['timestamp']) / 3600
+            recency_score = max(0, 1 - age_hours / 168)  # Decae en 1 semana
+            score += recency_score
+            
+            if score > 1.0:
+                recommendations.append((content_hash, score))
+        
+        recommendations.sort(key=lambda x: x[1], reverse=True)
+        return [hash_val for hash_val, _ in recommendations[:5]]
+    
+    def _detect_content_type(self, content: str) -> str:
+        """Detecta tipo de contenido para optimización"""
+        if 'def ' in content and 'import ' in content:
+            return 'python_code'
+        elif '```' in content and '#' in content:
+            return 'markdown_doc'
+        elif '{' in content and '"' in content:
+            return 'json_data'
+        elif '<' in content and '>' in content:
+            return 'xml_html'
+        else:
+            return 'text'
+    
+    def _extract_keywords(self, content: str) -> List[str]:
+        """Extrae keywords relevantes del contenido"""
+        # Palabras técnicas comunes
+        tech_keywords = re.findall(r'\b(?:class|def|function|import|export|const|var|let|async|await|return|if|else|for|while|try|catch|finally)\b', content.lower())
+        
+        # Identificadores (variables, funciones, clases)
+        identifiers = re.findall(r'\b[a-zA-Z_][a-zA-Z0-9_]{2,}\b', content)
+        
+        # Combinar y filtrar
+        all_keywords = tech_keywords + [id.lower() for id in identifiers if len(id) > 2]
+        
+        # Retornar top 10 keywords más frecuentes
+        from collections import Counter
+        keyword_counts = Counter(all_keywords)
+        return [kw for kw, _ in keyword_counts.most_common(10)]
+    
+    def _generate_semantic_signature(self, content: str) -> Dict:
+        """Genera firma semántica del contenido"""
+        return {
+            'length': len(content),
+            'word_count': len(content.split()),
+            'line_count': content.count('\n'),
+            'code_density': len(re.findall(r'[{}();]', content)) / max(1, len(content)),
+            'comment_ratio': len(re.findall(r'#.*|//.*|/\*.*?\*/', content)) / max(1, content.count('\n')),
+            'keywords_hash': hash(tuple(sorted(self._extract_keywords(content))))
+        }
+    
+    def _calculate_semantic_similarity(self, sig1: Dict, sig2: Dict) -> float:
+        """Calcula similitud semántica entre dos firmas"""
+        # Similitud por estructura
+        length_sim = 1 - abs(sig1['length'] - sig2['length']) / max(sig1['length'], sig2['length'], 1)
+        word_sim = 1 - abs(sig1['word_count'] - sig2['word_count']) / max(sig1['word_count'], sig2['word_count'], 1)
+        
+        # Similitud por contenido
+        code_sim = 1 - abs(sig1['code_density'] - sig2['code_density'])
+        keyword_sim = 1.0 if sig1['keywords_hash'] == sig2['keywords_hash'] else 0.3
+        
+        # Promedio ponderado
+        return (length_sim * 0.2 + word_sim * 0.3 + code_sim * 0.2 + keyword_sim * 0.3)
+    
+    def _calculate_priority_score(self, content: str, metadata: Dict) -> float:
+        """Calcula score de prioridad para el contenido"""
+        base_score = len(content) / 1000  # Score base por tamaño
+        
+        # Bonus por tipo de archivo importante
+        important_files = ['readme', 'config', 'main', 'index', 'app']
+        filename = metadata.get('path', '').lower()
+        if any(imp in filename for imp in important_files):
+            base_score *= 1.5
+        
+        # Bonus por contenido técnico
+        if self._detect_content_type(content) in ['python_code', 'json_data']:
+            base_score *= 1.2
+        
+        return min(10.0, base_score)
+
+class AdvancedSemanticProcessor:
+    """Procesador semántico avanzado para guía del modelo"""
+    
+    def __init__(self):
+        self.context_patterns = {}  # Patrones de contexto aprendidos
+        self.semantic_relationships = defaultdict(list)  # Relaciones semánticas
+        self.model_guidance_rules = {}  # Reglas para guiar al modelo
+        
+    def analyze_context_patterns(self, content: str, query: str) -> Dict:
+        """Analiza patrones de contexto para guiar al modelo"""
+        analysis = {
+            'content_complexity': self._assess_complexity(content),
+            'query_intent': self._analyze_query_intent(query),
+            'model_guidance': self._generate_model_guidance(content, query),
+            'anti_hallucination_signals': self._detect_hallucination_risks(content, query)
+        }
+        
+        return analysis
+    
+    def _assess_complexity(self, content: str) -> Dict:
+        """Evalúa complejidad del contenido"""
+        return {
+            'technical_density': len(re.findall(r'\b(?:class|def|import|function)\b', content)) / max(1, content.count('\n')),
+            'nesting_level': max(len(re.findall(r'^(\s*)', line)) for line in content.split('\n')),
+            'concept_diversity': len(set(self._extract_concepts(content))),
+            'information_density': len(content.split()) / max(1, content.count('\n'))
+        }
+    
+    def _analyze_query_intent(self, query: str) -> Dict:
+        """Analiza intención de la query"""
+        intent_patterns = {
+            'code_generation': r'\b(?:create|generate|write|implement|build)\b',
+            'explanation': r'\b(?:explain|what|how|why|describe)\b',
+            'debugging': r'\b(?:error|bug|fix|debug|problem|issue)\b',
+            'optimization': r'\b(?:optimize|improve|better|faster|efficient)\b',
+            'modification': r'\b(?:change|modify|update|edit|refactor)\b'
+        }
+        
+        detected_intents = {}
+        for intent, pattern in intent_patterns.items():
+            if re.search(pattern, query.lower()):
+                detected_intents[intent] = True
+        
+        return {
+            'primary_intent': max(detected_intents.keys()) if detected_intents else 'general',
+            'confidence': len(detected_intents) / len(intent_patterns),
+            'complexity_level': 'high' if len(query.split()) > 10 else 'medium' if len(query.split()) > 5 else 'low'
+        }
+    
+    def _generate_model_guidance(self, content: str, query: str) -> Dict:
+        """Genera guías específicas para el modelo"""
+        guidance = {
+            'focus_areas': self._identify_focus_areas(content, query),
+            'avoid_patterns': self._identify_avoid_patterns(content),
+            'context_preservation': self._get_context_preservation_rules(content),
+            'response_structure': self._suggest_response_structure(query)
+        }
+        
+        return guidance
+    
+    def _detect_hallucination_risks(self, content: str, query: str) -> List[str]:
+        """Detecta riesgos de alucinación"""
+        risks = []
+        
+        # Riesgo por contenido incompleto
+        if content.count('...') > 2 or '[truncated]' in content:
+            risks.append('incomplete_context')
+        
+        # Riesgo por query ambigua
+        if len(query.split()) < 3:
+            risks.append('ambiguous_query')
+        
+        # Riesgo por contenido técnico complejo
+        if self._assess_complexity(content)['technical_density'] > 0.5:
+            risks.append('high_technical_complexity')
+        
+        return risks
+    
+    def _extract_concepts(self, content: str) -> List[str]:
+        """Extrae conceptos clave del contenido"""
+        # Extraer nombres de clases, funciones, variables importantes
+        concepts = []
+        concepts.extend(re.findall(r'class\s+(\w+)', content))
+        concepts.extend(re.findall(r'def\s+(\w+)', content))
+        concepts.extend(re.findall(r'(\w+)\s*=', content))
+        
+        return list(set(concepts))
+    
+    def _identify_focus_areas(self, content: str, query: str) -> List[str]:
+        """Identifica áreas de enfoque para el modelo"""
+        focus_areas = []
+        
+        query_words = set(query.lower().split())
+        content_concepts = set(self._extract_concepts(content))
+        
+        # Intersección entre query y conceptos del contenido
+        relevant_concepts = query_words & content_concepts
+        focus_areas.extend(list(relevant_concepts))
+        
+        return focus_areas[:5]  # Top 5 áreas de enfoque
+    
+    def _identify_avoid_patterns(self, content: str) -> List[str]:
+        """Identifica patrones que el modelo debe evitar"""
+        avoid_patterns = []
+        
+        # Evitar duplicar imports existentes
+        if 'import ' in content:
+            avoid_patterns.append('duplicate_imports')
+        
+        # Evitar redefinir funciones existentes
+        existing_functions = re.findall(r'def\s+(\w+)', content)
+        if existing_functions:
+            avoid_patterns.append('function_redefinition')
+        
+        return avoid_patterns
+    
+    def _get_context_preservation_rules(self, content: str) -> Dict:
+        """Obtiene reglas para preservar contexto"""
+        return {
+            'maintain_coding_style': self._detect_coding_style(content),
+            'preserve_imports': 'import ' in content,
+            'maintain_indentation': self._detect_indentation_style(content),
+            'preserve_naming_convention': self._detect_naming_convention(content)
+        }
+    
+    def _suggest_response_structure(self, query: str) -> Dict:
+        """Sugiere estructura de respuesta"""
+        intent = self._analyze_query_intent(query)
+        
+        structures = {
+            'code_generation': ['explanation', 'code_block', 'usage_example'],
+            'explanation': ['overview', 'detailed_explanation', 'examples'],
+            'debugging': ['problem_identification', 'solution', 'prevention'],
+            'optimization': ['current_analysis', 'improvements', 'implementation']
+        }
+        
+        return {
+            'suggested_structure': structures.get(intent['primary_intent'], ['response']),
+            'include_code_examples': intent['primary_intent'] in ['code_generation', 'debugging', 'optimization'],
+            'include_explanations': True
+        }
+    
+    def _detect_coding_style(self, content: str) -> str:
+        """Detecta estilo de código"""
+        if content.count("'") > content.count('"'):
+            return 'single_quotes'
+        elif content.count('"') > content.count("'"):
+            return 'double_quotes'
+        else:
+            return 'mixed'
+    
+    def _detect_indentation_style(self, content: str) -> str:
+        """Detecta estilo de indentación"""
+        lines = content.split('\n')
+        tab_count = sum(1 for line in lines if line.startswith('\t'))
+        space_count = sum(1 for line in lines if line.startswith('    '))
+        
+        if tab_count > space_count:
+            return 'tabs'
+        elif space_count > tab_count:
+            return 'spaces'
+        else:
+            return 'mixed'
+    
+    def _detect_naming_convention(self, content: str) -> str:
+        """Detecta convención de nomenclatura"""
+        snake_case = len(re.findall(r'\b[a-z]+_[a-z]+\b', content))
+        camel_case = len(re.findall(r'\b[a-z]+[A-Z][a-z]+\b', content))
+        
+        if snake_case > camel_case:
+            return 'snake_case'
+        elif camel_case > snake_case:
+            return 'camelCase'
+        else:
+            return 'mixed'
+
 class SemanticChunker:
     """Chunking semántico inteligente mejorado - Algoritmo optimizado"""
     

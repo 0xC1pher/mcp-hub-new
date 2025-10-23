@@ -49,6 +49,603 @@ except ImportError as e:
     logger.warning(f"⚠️ Sistema de indexación de contexto no disponible: {e}")
     CONTEXT_INDEXING_AVAILABLE = False
 
+
+class ConsolidatedACESystem:
+    """Sistema ACE consolidado (Análisis, Curación, Evolución) para guía del modelo"""
+    
+    def __init__(self):
+        self.analysis_engine = AnalysisEngine()
+        self.curation_engine = CurationEngine()
+        self.evolution_tracker = EvolutionTracker()
+        self.knowledge_base = {}
+        self.learning_patterns = defaultdict(list)
+        
+    def analyze_context(self, query: str, context: str) -> Dict:
+        """Análisis completo del contexto y query"""
+        return self.analysis_engine.deep_analyze(query, context)
+    
+    def curate_response(self, analysis: Dict, raw_response: str) -> Dict:
+        """Cura y mejora la respuesta basada en análisis"""
+        return self.curation_engine.curate(analysis, raw_response)
+    
+    def evolve_knowledge(self, interaction_data: Dict) -> None:
+        """Evoluciona el conocimiento basado en interacciones"""
+        self.evolution_tracker.track_evolution(interaction_data)
+
+
+class AnalysisEngine:
+    """Motor de análisis profundo para contexto y queries"""
+    
+    def __init__(self):
+        self.complexity_analyzer = ComplexityAnalyzer()
+        self.intent_detector = IntentDetector()
+        self.context_mapper = ContextMapper()
+    
+    def deep_analyze(self, query: str, context: str) -> Dict:
+        """Análisis profundo de query y contexto"""
+        analysis = {
+            'query_analysis': self._analyze_query(query),
+            'context_analysis': self._analyze_context(context),
+            'relationship_analysis': self._analyze_relationships(query, context),
+            'complexity_score': self._calculate_complexity(query, context),
+            'guidance_recommendations': self._generate_guidance(query, context)
+        }
+        
+        return analysis
+    
+    def _analyze_query(self, query: str) -> Dict:
+        """Análisis específico del query"""
+        return {
+            'intent': self.intent_detector.detect_intent(query),
+            'complexity': self.complexity_analyzer.assess_query_complexity(query),
+            'key_concepts': self._extract_key_concepts(query),
+            'ambiguity_level': self._assess_ambiguity(query)
+        }
+    
+    def _analyze_context(self, context: str) -> Dict:
+        """Análisis específico del contexto"""
+        return {
+            'content_type': self._detect_content_type(context),
+            'structure_quality': self._assess_structure(context),
+            'information_density': self._calculate_info_density(context),
+            'technical_depth': self._assess_technical_depth(context)
+        }
+    
+    def _analyze_relationships(self, query: str, context: str) -> Dict:
+        """Análisis de relaciones entre query y contexto"""
+        query_concepts = set(self._extract_key_concepts(query))
+        context_concepts = set(self._extract_key_concepts(context))
+        
+        return {
+            'concept_overlap': len(query_concepts & context_concepts),
+            'relevance_score': self._calculate_relevance(query, context),
+            'context_sufficiency': self._assess_context_sufficiency(query, context),
+            'missing_elements': list(query_concepts - context_concepts)
+        }
+    
+    def _extract_key_concepts(self, text: str) -> List[str]:
+        """Extrae conceptos clave del texto"""
+        # Conceptos técnicos
+        tech_concepts = re.findall(r'\b(?:class|function|method|variable|API|database|server|client|framework)\b', text.lower())
+        
+        # Identificadores importantes
+        identifiers = re.findall(r'\b[A-Z][a-zA-Z]*\b|\b[a-z_]+[a-z]\b', text)
+        
+        # Combinar y filtrar
+        all_concepts = tech_concepts + [id.lower() for id in identifiers if len(id) > 2]
+        
+        # Retornar conceptos únicos más frecuentes
+        from collections import Counter
+        concept_counts = Counter(all_concepts)
+        return [concept for concept, _ in concept_counts.most_common(10)]
+    
+    def _detect_content_type(self, context: str) -> str:
+        """Detecta el tipo de contenido"""
+        if 'def ' in context and 'class ' in context:
+            return 'python_code'
+        elif '```' in context and '#' in context:
+            return 'markdown_documentation'
+        elif '{' in context and '"' in context:
+            return 'json_configuration'
+        else:
+            return 'text_content'
+    
+    def _assess_structure(self, context: str) -> float:
+        """Evalúa la calidad de la estructura"""
+        structure_indicators = [
+            len(re.findall(r'#{1,3}\s+', context)) * 0.2,  # Headers
+            len(re.findall(r'```.*?```', context, re.DOTALL)) * 0.3,  # Code blocks
+            len(re.findall(r'^\s*[-*+]\s+', context, re.MULTILINE)) * 0.1,  # Lists
+            len(re.findall(r'^\s*\d+\.\s+', context, re.MULTILINE)) * 0.1  # Numbered lists
+        ]
+        
+        return min(1.0, sum(structure_indicators))
+    
+    def _calculate_info_density(self, context: str) -> float:
+        """Calcula densidad de información"""
+        if not context:
+            return 0.0
+        
+        words = len(context.split())
+        lines = context.count('\n') + 1
+        chars = len(context)
+        
+        # Normalizar métricas
+        word_density = min(1.0, words / 500)
+        line_density = min(1.0, lines / 50)
+        char_density = min(1.0, chars / 2000)
+        
+        return (word_density + line_density + char_density) / 3
+    
+    def _assess_technical_depth(self, context: str) -> float:
+        """Evalúa profundidad técnica"""
+        technical_indicators = [
+            'class ', 'def ', 'import ', 'function', 'method',
+            'variable', 'parameter', 'return', 'exception',
+            'algorithm', 'optimization', 'performance'
+        ]
+        
+        tech_count = sum(1 for indicator in technical_indicators if indicator in context.lower())
+        return min(1.0, tech_count / 10)
+    
+    def _calculate_relevance(self, query: str, context: str) -> float:
+        """Calcula relevancia entre query y contexto"""
+        query_words = set(query.lower().split())
+        context_words = set(context.lower().split())
+        
+        if not query_words:
+            return 0.0
+        
+        intersection = len(query_words & context_words)
+        union = len(query_words | context_words)
+        
+        return intersection / union if union > 0 else 0.0
+    
+    def _assess_context_sufficiency(self, query: str, context: str) -> str:
+        """Evalúa si el contexto es suficiente"""
+        relevance = self._calculate_relevance(query, context)
+        context_length = len(context)
+        
+        if relevance > 0.7 and context_length > 500:
+            return 'sufficient'
+        elif relevance > 0.4 and context_length > 200:
+            return 'adequate'
+        else:
+            return 'insufficient'
+    
+    def _assess_ambiguity(self, query: str) -> str:
+        """Evalúa nivel de ambigüedad del query"""
+        if len(query.split()) < 3:
+            return 'high'
+        elif len(query.split()) < 7:
+            return 'medium'
+        else:
+            return 'low'
+    
+    def _calculate_complexity(self, query: str, context: str) -> float:
+        """Calcula score de complejidad general"""
+        query_complexity = len(query.split()) / 20  # Normalizado
+        context_complexity = self._assess_technical_depth(context)
+        
+        return min(1.0, (query_complexity + context_complexity) / 2)
+    
+    def _generate_guidance(self, query: str, context: str) -> Dict:
+        """Genera recomendaciones de guía"""
+        analysis = self._analyze_query(query)
+        
+        guidance = {
+            'response_approach': self._suggest_approach(analysis['intent']),
+            'focus_areas': self._extract_key_concepts(query)[:3],
+            'caution_areas': [],
+            'enhancement_suggestions': []
+        }
+        
+        # Agregar precauciones basadas en análisis
+        if analysis['ambiguity_level'] == 'high':
+            guidance['caution_areas'].append('clarify_requirements')
+        
+        if self._assess_context_sufficiency(query, context) == 'insufficient':
+            guidance['caution_areas'].append('request_more_context')
+        
+        return guidance
+    
+    def _suggest_approach(self, intent: str) -> str:
+        """Sugiere enfoque de respuesta basado en intención"""
+        approaches = {
+            'code_generation': 'step_by_step_implementation',
+            'explanation': 'structured_explanation',
+            'debugging': 'systematic_troubleshooting',
+            'optimization': 'analysis_and_improvement',
+            'general': 'comprehensive_response'
+        }
+        
+        return approaches.get(intent, 'comprehensive_response')
+
+
+class CurationEngine:
+    """Motor de curación para mejorar respuestas"""
+    
+    def __init__(self):
+        self.quality_filters = QualityFilters()
+        self.enhancement_engine = EnhancementEngine()
+        self.safety_checker = SafetyChecker()
+    
+    def curate(self, analysis: Dict, raw_response: str) -> Dict:
+        """Cura y mejora la respuesta"""
+        curation_result = {
+            'original_response': raw_response,
+            'quality_assessment': self.quality_filters.assess(raw_response),
+            'safety_check': self.safety_checker.check(raw_response, analysis),
+            'enhancements': self.enhancement_engine.suggest_enhancements(raw_response, analysis),
+            'curated_response': self._apply_curation(raw_response, analysis)
+        }
+        
+        return curation_result
+    
+    def _apply_curation(self, response: str, analysis: Dict) -> str:
+        """Aplica mejoras de curación"""
+        curated = response
+        
+        # Aplicar mejoras basadas en análisis
+        if analysis.get('complexity_score', 0) > 0.7:
+            curated = self._add_complexity_warnings(curated)
+        
+        if analysis.get('context_analysis', {}).get('technical_depth', 0) > 0.8:
+            curated = self._enhance_technical_accuracy(curated)
+        
+        return curated
+    
+    def _add_complexity_warnings(self, response: str) -> str:
+        """Agrega advertencias para contenido complejo"""
+        if 'complejo' not in response.lower() and 'complex' not in response.lower():
+            return f"⚠️ **Nota**: Esta es una respuesta técnica compleja.\n\n{response}"
+        return response
+    
+    def _enhance_technical_accuracy(self, response: str) -> str:
+        """Mejora precisión técnica"""
+        # Agregar disclaimers técnicos si es necesario
+        if not any(phrase in response.lower() for phrase in ['puede variar', 'dependiendo de', 'en algunos casos']):
+            return f"{response}\n\n📝 **Nota**: Los detalles pueden variar según la implementación específica."
+        return response
+
+
+class EvolutionTracker:
+    """Rastreador de evolución del conocimiento"""
+    
+    def __init__(self):
+        self.interaction_history = []
+        self.learning_patterns = defaultdict(list)
+        self.improvement_metrics = {}
+    
+    def track_evolution(self, interaction_data: Dict) -> None:
+        """Rastrea la evolución del conocimiento"""
+        self.interaction_history.append({
+            'timestamp': time.time(),
+            'query_type': interaction_data.get('query_type'),
+            'success_metrics': interaction_data.get('success_metrics'),
+            'improvement_areas': interaction_data.get('improvement_areas')
+        })
+        
+        # Actualizar patrones de aprendizaje
+        self._update_learning_patterns(interaction_data)
+    
+    def _update_learning_patterns(self, data: Dict) -> None:
+        """Actualiza patrones de aprendizaje"""
+        query_type = data.get('query_type', 'general')
+        success_score = data.get('success_metrics', {}).get('overall_score', 0.5)
+        
+        self.learning_patterns[query_type].append(success_score)
+        
+        # Mantener solo los últimos 100 registros por tipo
+        if len(self.learning_patterns[query_type]) > 100:
+            self.learning_patterns[query_type] = self.learning_patterns[query_type][-100:]
+
+
+class ComplexityAnalyzer:
+    """Analizador de complejidad"""
+    
+    def assess_query_complexity(self, query: str) -> float:
+        """Evalúa complejidad del query"""
+        factors = {
+            'length': min(1.0, len(query.split()) / 20),
+            'technical_terms': self._count_technical_terms(query) / 10,
+            'specificity': self._assess_specificity(query),
+            'ambiguity': 1.0 - self._assess_clarity(query)
+        }
+        
+        weights = {'length': 0.2, 'technical_terms': 0.3, 'specificity': 0.3, 'ambiguity': 0.2}
+        
+        return sum(score * weights[factor] for factor, score in factors.items())
+    
+    def _count_technical_terms(self, text: str) -> int:
+        """Cuenta términos técnicos"""
+        technical_terms = [
+            'algorithm', 'optimization', 'implementation', 'architecture',
+            'framework', 'database', 'API', 'class', 'function', 'method'
+        ]
+        
+        return sum(1 for term in technical_terms if term in text.lower())
+    
+    def _assess_specificity(self, query: str) -> float:
+        """Evalúa especificidad del query"""
+        specific_indicators = ['how to', 'implement', 'create', 'fix', 'optimize']
+        general_indicators = ['what is', 'explain', 'tell me about']
+        
+        specific_count = sum(1 for indicator in specific_indicators if indicator in query.lower())
+        general_count = sum(1 for indicator in general_indicators if indicator in query.lower())
+        
+        if specific_count > general_count:
+            return 0.8
+        elif general_count > specific_count:
+            return 0.3
+        else:
+            return 0.5
+    
+    def _assess_clarity(self, query: str) -> float:
+        """Evalúa claridad del query"""
+        clarity_factors = {
+            'has_subject': any(word in query.lower() for word in ['how', 'what', 'why', 'when', 'where']),
+            'has_context': len(query.split()) > 5,
+            'has_specifics': any(char in query for char in ['(', ')', '{', '}', '"', "'"]),
+            'proper_grammar': query.count('?') <= 1 and query.count('.') <= 2
+        }
+        
+        return sum(clarity_factors.values()) / len(clarity_factors)
+
+
+class IntentDetector:
+    """Detector de intención"""
+    
+    def detect_intent(self, query: str) -> str:
+        """Detecta la intención del query"""
+        intent_patterns = {
+            'code_generation': r'\b(?:create|generate|write|implement|build|make)\b',
+            'explanation': r'\b(?:explain|what|how|why|describe|tell me)\b',
+            'debugging': r'\b(?:error|bug|fix|debug|problem|issue|broken)\b',
+            'optimization': r'\b(?:optimize|improve|better|faster|efficient|performance)\b',
+            'modification': r'\b(?:change|modify|update|edit|refactor|alter)\b',
+            'analysis': r'\b(?:analyze|review|evaluate|assess|examine)\b'
+        }
+        
+        detected_intents = {}
+        for intent, pattern in intent_patterns.items():
+            if re.search(pattern, query.lower()):
+                detected_intents[intent] = len(re.findall(pattern, query.lower()))
+        
+        if detected_intents:
+            return max(detected_intents.items(), key=lambda x: x[1])[0]
+        else:
+            return 'general'
+
+
+class ContextMapper:
+    """Mapeador de contexto"""
+    
+    def map_context_structure(self, context: str) -> Dict:
+        """Mapea la estructura del contexto"""
+        return {
+            'sections': self._identify_sections(context),
+            'code_blocks': self._extract_code_blocks(context),
+            'documentation': self._extract_documentation(context),
+            'examples': self._extract_examples(context)
+        }
+    
+    def _identify_sections(self, context: str) -> List[str]:
+        """Identifica secciones del contexto"""
+        headers = re.findall(r'^#{1,3}\s+(.+)$', context, re.MULTILINE)
+        return headers
+    
+    def _extract_code_blocks(self, context: str) -> List[str]:
+        """Extrae bloques de código"""
+        code_blocks = re.findall(r'```.*?\n(.*?)```', context, re.DOTALL)
+        return [block.strip() for block in code_blocks]
+    
+    def _extract_documentation(self, context: str) -> List[str]:
+        """Extrae documentación"""
+        doc_blocks = re.findall(r'"""(.*?)"""', context, re.DOTALL)
+        return [doc.strip() for doc in doc_blocks]
+    
+    def _extract_examples(self, context: str) -> List[str]:
+        """Extrae ejemplos"""
+        example_patterns = [
+            r'ejemplo:?\s*(.*?)(?=\n\n|\Z)',
+            r'example:?\s*(.*?)(?=\n\n|\Z)'
+        ]
+        
+        examples = []
+        for pattern in example_patterns:
+            examples.extend(re.findall(pattern, context, re.IGNORECASE | re.DOTALL))
+        
+        return [ex.strip() for ex in examples if ex.strip()]
+
+
+class AdvancedQueryOptimizer:
+    """Optimizador avanzado de queries"""
+    
+    def __init__(self):
+        self.semantic_expander = SemanticExpander()
+        self.context_enhancer = ContextEnhancer()
+    
+    def optimize_query(self, query: str, context: str) -> Dict:
+        """Optimiza query para mejor respuesta"""
+        return {
+            'original_query': query,
+            'expanded_query': self.semantic_expander.expand(query),
+            'enhanced_context': self.context_enhancer.enhance(context, query),
+            'optimization_score': self._calculate_optimization_score(query, context)
+        }
+    
+    def _calculate_optimization_score(self, query: str, context: str) -> float:
+        """Calcula score de optimización"""
+        # Simplificado para el ejemplo
+        return min(1.0, (len(query.split()) + len(context.split())) / 1000)
+
+
+class SemanticExpander:
+    """Expansor semántico de queries"""
+    
+    def expand(self, query: str) -> str:
+        """Expande query semánticamente"""
+        # Simplificado - en implementación real usaría embeddings
+        expansions = {
+            'create': 'generate implement build make develop',
+            'fix': 'debug resolve solve repair correct',
+            'optimize': 'improve enhance accelerate streamline'
+        }
+        
+        expanded = query
+        for term, expansion in expansions.items():
+            if term in query.lower():
+                expanded += f" ({expansion})"
+        
+        return expanded
+
+
+class ContextEnhancer:
+    """Mejorador de contexto"""
+    
+    def enhance(self, context: str, query: str) -> str:
+        """Mejora contexto basado en query"""
+        # Agregar metadatos relevantes
+        enhanced = f"QUERY_CONTEXT: {query}\n\n{context}"
+        
+        # Agregar indicadores de relevancia
+        query_words = set(query.lower().split())
+        context_lines = context.split('\n')
+        
+        relevant_lines = []
+        for line in context_lines:
+            line_words = set(line.lower().split())
+            if query_words & line_words:
+                relevant_lines.append(f"[RELEVANT] {line}")
+            else:
+                relevant_lines.append(line)
+        
+        return '\n'.join(relevant_lines)
+
+
+class ContextCurator:
+    """Curador de contexto"""
+    
+    def curate_context(self, raw_context: str, query: str) -> Dict:
+        """Cura contexto para optimizar respuesta"""
+        return {
+            'curated_context': self._apply_curation_rules(raw_context, query),
+            'curation_metadata': self._generate_metadata(raw_context, query),
+            'quality_score': self._assess_context_quality(raw_context)
+        }
+    
+    def _apply_curation_rules(self, context: str, query: str) -> str:
+        """Aplica reglas de curación"""
+        # Simplificado - priorizar líneas relevantes
+        lines = context.split('\n')
+        query_words = set(query.lower().split())
+        
+        prioritized_lines = []
+        for line in lines:
+            line_words = set(line.lower().split())
+            relevance = len(query_words & line_words)
+            prioritized_lines.append((relevance, line))
+        
+        # Ordenar por relevancia y tomar top lines
+        prioritized_lines.sort(key=lambda x: x[0], reverse=True)
+        
+        return '\n'.join([line for _, line in prioritized_lines[:50]])
+    
+    def _generate_metadata(self, context: str, query: str) -> Dict:
+        """Genera metadatos de curación"""
+        return {
+            'original_length': len(context),
+            'curated_length': len(self._apply_curation_rules(context, query)),
+            'relevance_score': self._calculate_relevance(context, query)
+        }
+    
+    def _assess_context_quality(self, context: str) -> float:
+        """Evalúa calidad del contexto"""
+        quality_factors = {
+            'length': min(1.0, len(context) / 2000),
+            'structure': len(re.findall(r'#{1,3}|```', context)) / 10,
+            'information_density': len(context.split()) / max(1, context.count('\n'))
+        }
+        
+        return sum(quality_factors.values()) / len(quality_factors)
+    
+    def _calculate_relevance(self, context: str, query: str) -> float:
+        """Calcula relevancia del contexto"""
+        context_words = set(context.lower().split())
+        query_words = set(query.lower().split())
+        
+        if not query_words:
+            return 0.0
+        
+        return len(context_words & query_words) / len(query_words)
+
+
+class EvolutionEngine:
+    """Motor de evolución del sistema"""
+    
+    def __init__(self):
+        self.evolution_history = []
+        self.performance_metrics = defaultdict(list)
+    
+    def evolve_system(self, feedback_data: Dict) -> Dict:
+        """Evoluciona el sistema basado en feedback"""
+        evolution_result = {
+            'evolution_applied': self._apply_evolution(feedback_data),
+            'performance_impact': self._assess_impact(feedback_data),
+            'next_evolution_suggestions': self._suggest_next_evolutions()
+        }
+        
+        self.evolution_history.append({
+            'timestamp': time.time(),
+            'evolution_data': evolution_result
+        })
+        
+        return evolution_result
+    
+    def _apply_evolution(self, feedback: Dict) -> List[str]:
+        """Aplica evoluciones basadas en feedback"""
+        evolutions = []
+        
+        if feedback.get('accuracy_score', 0) < 0.7:
+            evolutions.append('improve_accuracy_algorithms')
+        
+        if feedback.get('response_time', 0) > 5.0:
+            evolutions.append('optimize_performance')
+        
+        return evolutions
+    
+    def _assess_impact(self, feedback: Dict) -> Dict:
+        """Evalúa impacto de evoluciones"""
+        return {
+            'accuracy_improvement': feedback.get('accuracy_score', 0) - 0.5,
+            'performance_improvement': max(0, 3.0 - feedback.get('response_time', 3.0)),
+            'user_satisfaction': feedback.get('satisfaction_score', 0.5)
+        }
+    
+    def _suggest_next_evolutions(self) -> List[str]:
+        """Sugiere próximas evoluciones"""
+        return [
+            'enhance_semantic_understanding',
+            'improve_context_awareness',
+            'optimize_response_generation'
+        ]
+
+
+# Clases auxiliares para el sistema ACE
+class QualityFilters:
+    def assess(self, response: str) -> Dict:
+        return {'quality_score': min(1.0, len(response) / 500)}
+
+class EnhancementEngine:
+    def suggest_enhancements(self, response: str, analysis: Dict) -> List[str]:
+        return ['add_examples', 'improve_clarity']
+
+class SafetyChecker:
+    def check(self, response: str, analysis: Dict) -> Dict:
+        return {'safety_score': 0.9, 'issues': []}
+
+
 class UnifiedMCPServer:
     """Servidor MCP unificado con todas las técnicas avanzadas"""
     
@@ -78,7 +675,12 @@ class UnifiedMCPServer:
         self.chunker = SemanticChunker()
         self.scorer = AdvancedScorer()
         self.memory_manager = MemoryManager()
-        self.ace_system = ACESystem()
+        
+        # Sistema ACE consolidado (Análisis, Curación, Evolución)
+        self.ace_system = ConsolidatedACESystem()
+        self.query_optimizer = AdvancedQueryOptimizer()
+        self.context_curator = ContextCurator()
+        self.evolution_engine = EvolutionEngine()
         
         # Estado del servidor
         self.indexed_files = {}
