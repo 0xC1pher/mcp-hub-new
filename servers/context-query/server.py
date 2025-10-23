@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Servidor MCP Context Query para SoftMedic - Versión Optimizada 2.0
+Servidor MCP Context Query para Yari-System - Versión Optimizada 2.0
 Implementa todas las estrategias avanzadas de OPTIMIZATION-STRATEGIES.md:
 - Token Budgeting Inteligente
 - Chunking Semántico Avanzado

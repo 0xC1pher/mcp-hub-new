@@ -1,8 +1,8 @@
 <!-- SECTION_ID: business_model -->
-# Modelo de Negocio - SoftMedic
+# Modelo de Negocio - Yari-System
 
 ## Visión General
-SoftMedic es un sistema integral de gestión médica diseñado inicialmente para consultorios privados, con capacidad de escalar a clínicas completas y hospitales. El modelo de negocio se basa en software como servicio (SaaS) con implementación local.
+Yari-System es un sistema integral de gestión médica diseñado inicialmente para consultorios privados, con capacidad de escalar a clínicas completas y hospitales. El modelo de negocio se basa en software como servicio (SaaS) con implementación local.
 
 ## Fuentes de Ingreso
 - **Licencias de software**: Venta de licencias perpetuas con mantenimiento anual
@@ -27,7 +27,7 @@ El sistema está diseñado para crecer desde 1 usuario hasta miles, manteniendo 
 <!-- SECTION_ID: business_model -->
 
 <!-- SECTION_ID: product_vision -->
-# Visión de Producto - SoftMedic
+# Visión de Producto - Yari-System
 
 ## Objetivos Trimestrales 2025
 - **Q1**: Completar expansión a clínica completa con hospitalización
@@ -56,7 +56,7 @@ El sistema está diseñado para crecer desde 1 usuario hasta miles, manteniendo 
 <!-- SECTION_ID: product_vision -->
 
 <!-- SECTION_ID: tech_architecture -->
-# Arquitectura Técnica - SoftMedic
+# Arquitectura Técnica - Yari-System
 
 ## Stack Tecnológico Principal
 - **Backend**: Django 5.0.6 (Python 3.11+)
@@ -123,7 +123,7 @@ User (Django Auth)
 <!-- SECTION_ID: tech_architecture -->
 
 <!-- SECTION_ID: coding_conventions -->
-# Convenciones de Código - SoftMedic
+# Convenciones de Código - Yari-System
 
 ## Estructura de Archivos
 ### Apps Django
@@ -308,7 +308,7 @@ coverage report
 <!-- SECTION_ID: coding_conventions -->
 
 <!-- SECTION_ID: workflow -->
-# Flujo de Trabajo - SoftMedic
+# Flujo de Trabajo - Yari-System
 
 ## Desarrollo de Características
 ### 1. Planificación
@@ -456,7 +456,7 @@ python manage.py runserver
 <!-- SECTION_ID: workflow -->
 
 <!-- SECTION_ID: constraints -->
-# Restricciones y Límites - SoftMedic
+# Restricciones y Límites - Yari-System
 
 ## Tecnologías Prohibidas
 ### Frameworks y Librerías

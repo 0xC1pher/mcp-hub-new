@@ -1,8 +1,8 @@
-# 🧭 SoftMedic MCP Context Hub - Versión Optimizada 2.0
+# 🧭 Yari-System MCP Context Hub - Versión Optimizada 2.0
 
 **🚀 IMPLEMENTACIÓN COMPLETA DE TODAS LAS OPTIMIZACIONES AVANZADAS**
 
-Servidor MCP (Model Context Protocol) que proporciona contexto inteligente sobre el proyecto SoftMedic a asistentes de IA como Windsurf/Cascade.
+Servidor MCP (Model Context Protocol) que proporciona contexto inteligente sobre el proyecto Yari-System a asistentes de IA como Windsurf/Cascade.
 
 ## ✨ **OPTIMIZACIONES IMPLEMENTADAS**
 

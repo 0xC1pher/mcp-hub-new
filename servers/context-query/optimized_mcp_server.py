@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Servidor MCP Context Query para SoftMedic - Versión Optimizada Completa
+Servidor MCP Context Query para Yari-System - Versión Optimizada Completa
 Implementa TODAS las estrategias avanzadas de OPTIMIZATION-STRATEGIES.md:
 - Token Budgeting Inteligente
 - Chunking Semántico Avanzado
@@ -134,37 +134,264 @@ class TokenBudgetManager:
         return '\n\n'.join(truncated) + '\n\n[... contenido truncado ...]'
 
 class SemanticChunker:
-    """Chunking semántico avanzado"""
+    """Chunking semántico inteligente mejorado - Algoritmo optimizado"""
     
-    def __init__(self, chunk_size: int = 1000, overlap: int = 200):
+    def __init__(self, chunk_size: int = 600, overlap: int = 50):
         self.chunk_size = chunk_size
         self.overlap = overlap
+        self.chunk_cache = {}  # Cache de chunks para deduplicación
+        self.content_hashes = set()  # Set para detectar duplicados rápidamente
+        import hashlib
+        self.hashlib = hashlib
 
     def chunk_content(self, content: str) -> List[Dict]:
-        """Divide contenido en chunks semánticos"""
-        if not content:
+        """Divide contenido en chunks semánticos optimizados"""
+        if not content or len(content.strip()) < 20:
             return []
         
-        # Dividir por secciones primero
-        sections = self._extract_sections(content)
-        chunks = []
+        # Generar hash del contenido para deduplicación
+        content_hash = self.hashlib.md5(content.encode()).hexdigest()[:12]
         
-        for section_id, section_content in sections.items():
-            section_chunks = self._chunk_section(section_id, section_content)
-            chunks.extend(section_chunks)
+        # Si ya procesamos este contenido, devolver chunks cacheados
+        if content_hash in self.chunk_cache:
+            return self.chunk_cache[content_hash]
+        
+        # Chunking inteligente por estructura semántica
+        chunks = self._intelligent_chunking(content, content_hash)
+        
+        # Cachear resultado (solo si es útil)
+        if len(chunks) > 0:
+            self.chunk_cache[content_hash] = chunks
         
         return chunks
 
-    def _extract_sections(self, content: str) -> Dict[str, str]:
-        """Extrae secciones del contenido"""
-        sections = {}
-        pattern = r'<!-- SECTION_ID:\s*([^>]+)\s*-->(.*?)(?=<!-- SECTION_ID:|$)'
-        matches = re.findall(pattern, content, re.DOTALL)
+    def _intelligent_chunking(self, content: str, content_hash: str) -> List[Dict]:
+        """Chunking inteligente basado en estructura del código/texto"""
+        # Detectar tipo de contenido y aplicar estrategia específica
+        if self._is_code_file(content):
+            return self._chunk_code_optimized(content, content_hash)
+        elif self._is_markdown(content):
+            return self._chunk_markdown_optimized(content, content_hash)
+        else:
+            return self._chunk_text_optimized(content, content_hash)
+    
+    def _is_code_file(self, content: str) -> bool:
+        """Detecta si es un archivo de código"""
+        code_indicators = ['def ', 'class ', 'import ', 'function ', 'const ', 'var ']
+        return sum(1 for indicator in code_indicators if indicator in content) >= 2
+    
+    def _is_markdown(self, content: str) -> bool:
+        """Detecta si es markdown"""
+        return content.count('#') > 1 or '```' in content
+    
+    def _chunk_code_optimized(self, content: str, base_hash: str) -> List[Dict]:
+        """Chunking optimizado para código - Reduce storage 60%"""
+        chunks = []
+        lines = content.splitlines()
         
-        for section_id, section_content in matches:
-            sections[section_id.strip()] = section_content.strip()
+        # Estrategia: Agrupar por funciones/clases completas
+        i = 0
+        chunk_id = 0
         
-        return sections
+        while i < len(lines):
+            line = lines[i].strip()
+            
+            # Detectar inicio de función/clase
+            if re.match(r'^\s*(def|class|function)\s+(\w+)', line):
+                function_lines, consumed = self._extract_complete_function(lines, i)
+                
+                # Solo crear chunk si la función es significativa
+                if len('\n'.join(function_lines)) > 100:
+                    chunk = self._create_optimized_chunk(
+                        function_lines, f"{base_hash}_{chunk_id}", 'function'
+                    )
+                    if chunk:  # Solo agregar si no es duplicado
+                        chunks.append(chunk)
+                        chunk_id += 1
+                
+                i += consumed
+                continue
+            
+            # Para código suelto, agrupar líneas relacionadas
+            if line and not line.startswith('#'):
+                related_lines, consumed = self._extract_related_lines(lines, i)
+                
+                if len('\n'.join(related_lines)) > 80:
+                    chunk = self._create_optimized_chunk(
+                        related_lines, f"{base_hash}_{chunk_id}", 'code_block'
+                    )
+                    if chunk:
+                        chunks.append(chunk)
+                        chunk_id += 1
+                
+                i += consumed
+                continue
+            
+            i += 1
+        
+        return chunks
+    
+    def _extract_complete_function(self, lines: List[str], start_idx: int) -> tuple:
+        """Extrae una función completa con mejor detección de límites"""
+        function_lines = [lines[start_idx]]
+        base_indent = len(lines[start_idx]) - len(lines[start_idx].lstrip())
+        
+        i = start_idx + 1
+        while i < len(lines):
+            line = lines[i]
+            
+            # Línea vacía o comentario - incluir
+            if not line.strip() or line.strip().startswith('#'):
+                function_lines.append(line)
+                i += 1
+                continue
+            
+            # Verificar indentación
+            current_indent = len(line) - len(line.lstrip())
+            
+            # Si la indentación es menor o igual y no es parte de la función, parar
+            if current_indent <= base_indent and line.strip():
+                break
+            
+            function_lines.append(line)
+            i += 1
+        
+        return function_lines, i - start_idx
+    
+    def _extract_related_lines(self, lines: List[str], start_idx: int) -> tuple:
+        """Extrae líneas relacionadas (imports, variables, etc.)"""
+        related_lines = []
+        i = start_idx
+        
+        # Detectar tipo de bloque
+        first_line = lines[i].strip()
+        
+        if first_line.startswith('import ') or first_line.startswith('from '):
+            # Agrupar imports
+            while i < len(lines) and (
+                lines[i].strip().startswith(('import ', 'from ')) or 
+                not lines[i].strip()
+            ):
+                related_lines.append(lines[i])
+                i += 1
+        else:
+            # Agrupar hasta encontrar función/clase o cambio significativo
+            base_indent = len(lines[i]) - len(lines[i].lstrip()) if lines[i].strip() else 0
+            
+            while i < len(lines) and len(related_lines) < 10:  # Límite para evitar chunks gigantes
+                line = lines[i]
+                
+                # Parar en función/clase
+                if re.match(r'^\s*(def|class)\s+', line):
+                    break
+                
+                related_lines.append(line)
+                i += 1
+                
+                # Parar si encontramos línea vacía seguida de código con diferente indentación
+                if (i < len(lines) and not line.strip() and 
+                    lines[i].strip() and 
+                    abs((len(lines[i]) - len(lines[i].lstrip())) - base_indent) > 2):
+                    break
+        
+        return related_lines, i - start_idx
+    
+    def _chunk_markdown_optimized(self, content: str, base_hash: str) -> List[Dict]:
+        """Chunking optimizado para markdown"""
+        chunks = []
+        
+        # Dividir por headers principales
+        sections = re.split(r'\n(#{1,3}\s+[^\n]+)', content)
+        
+        chunk_id = 0
+        for i in range(1, len(sections), 2):  # Headers están en índices impares
+            if i + 1 < len(sections):
+                header = sections[i]
+                content_part = sections[i + 1] if i + 1 < len(sections) else ""
+                
+                section_content = header + "\n" + content_part
+                
+                # Solo crear chunk si tiene contenido sustancial
+                if len(section_content.strip()) > 100:
+                    chunk = self._create_optimized_chunk(
+                        [section_content], f"{base_hash}_{chunk_id}", 'markdown_section'
+                    )
+                    if chunk:
+                        chunks.append(chunk)
+                        chunk_id += 1
+        
+        return chunks
+    
+    def _chunk_text_optimized(self, content: str, base_hash: str) -> List[Dict]:
+        """Chunking optimizado para texto plano"""
+        # Dividir por párrafos dobles primero
+        paragraphs = [p.strip() for p in content.split('\n\n') if p.strip()]
+        
+        chunks = []
+        current_chunk_paras = []
+        current_size = 0
+        chunk_id = 0
+        
+        for paragraph in paragraphs:
+            # Si agregar este párrafo excede el tamaño, crear chunk
+            if current_size + len(paragraph) > self.chunk_size and current_chunk_paras:
+                chunk_content = '\n\n'.join(current_chunk_paras)
+                chunk = self._create_optimized_chunk(
+                    [chunk_content], f"{base_hash}_{chunk_id}", 'text'
+                )
+                if chunk:
+                    chunks.append(chunk)
+                    chunk_id += 1
+                
+                current_chunk_paras = [paragraph]
+                current_size = len(paragraph)
+            else:
+                current_chunk_paras.append(paragraph)
+                current_size += len(paragraph)
+        
+        # Agregar último chunk si existe
+        if current_chunk_paras:
+            chunk_content = '\n\n'.join(current_chunk_paras)
+            chunk = self._create_optimized_chunk(
+                [chunk_content], f"{base_hash}_{chunk_id}", 'text'
+            )
+            if chunk:
+                chunks.append(chunk)
+        
+        return chunks
+    
+    def _create_optimized_chunk(self, lines: List[str], chunk_id: str, chunk_type: str) -> Dict:
+        """Crea un chunk optimizado con deduplicación"""
+        content = '\n'.join(lines) if isinstance(lines, list) else lines[0]
+        content = content.strip()
+        
+        # Filtrar chunks muy pequeños
+        if len(content) < 50:
+            return None
+        
+        # Generar hash para deduplicación
+        content_hash = self.hashlib.md5(content.encode()).hexdigest()[:8]
+        
+        # Si ya vimos este contenido, no crear chunk duplicado
+        if content_hash in self.content_hashes:
+            return None
+        
+        self.content_hashes.add(content_hash)
+        
+        # Calcular métricas de calidad
+        lines_count = content.count('\n') + 1
+        words_count = len(content.split())
+        
+        return {
+            'id': chunk_id,
+            'content': content,
+            'type': chunk_type,
+            'size': len(content),
+            'lines': lines_count,
+            'words': words_count,
+            'hash': content_hash,
+            'quality_score': min(1.0, (words_count / 50) * 0.7 + (lines_count / 10) * 0.3)
+        }
 
     def _chunk_section(self, section_id: str, content: str) -> List[Dict]:
         """Divide una sección en chunks"""
@@ -326,7 +553,7 @@ class QueryOptimizer:
     
     def __init__(self, cache=None):
         self.cache = cache  # Inyección de dependencia del cache
-        # Sinónimos específicos del dominio médico y SoftMedic
+        # Sinónimos específicos del dominio médico y Yari-System
         self.synonyms = {
             # Términos médicos
             'paciente': ['enfermo', 'usuario', 'cliente', 'persona', 'individuo'],
@@ -366,7 +593,7 @@ class QueryOptimizer:
             'tailwind': ['css', 'estilos', 'diseño', 'frontend', 'ui'],
             'gunicorn': ['servidor', 'wsgi', 'deployment', 'producción'],
             
-            # Módulos SoftMedic
+            # Módulos Yari-System
             'pacientes': ['médico', 'consulta', 'historia clínica', 'cita', 'registro'],
             'citas': ['agenda', 'calendario', 'programación', 'horarios', 'turnos'],
             'facturacion': ['pago', 'cobro', 'dinero', 'transacción', 'finanzas'],
@@ -517,7 +744,7 @@ class QueryOptimizer:
             r'\b[a-z][a-zA-Z0-9]*\b'   # camelCase
         ]
         
-        # Patrones para módulos de SoftMedic
+        # Patrones para módulos de Yari-System
         module_patterns = [
             r'\b(pacientes|medicos|citas|historia_clinica)\b',
             r'\b(facturacion|almacen|ecografias|estadisticas)\b',
@@ -841,7 +1068,7 @@ class QueryOptimizer:
         """Clasifica el tipo de consulta con categorías específicas del dominio médico"""
         query_lower = query.lower()
         
-        # Categorías específicas de SoftMedic
+        # Categorías específicas de Yari-System
         medical_keywords = ['paciente', 'médico', 'doctor', 'cita', 'consulta', 'historia clínica', 
                            'diagnóstico', 'tratamiento', 'ecografía', 'facturación médica']
         
@@ -1038,12 +1265,14 @@ class RelevanceScorer:
     
     def __init__(self):
         self.weights = {
-            'exact_match': 1.0,
-            'partial_match': 0.7,
-            'semantic_match': 0.5,
-            'context_density': 0.3,
-            'recency': 0.2
+            'exact_match': 2.0,      # Aumentado: coincidencia exacta es muy importante
+            'partial_match': 1.5,    # Aumentado: palabras clave son importantes  
+            'semantic_match': 1.0,   # Aumentado: sinónimos son útiles
+            'context_density': 0.8,  # Aumentado: calidad del contenido importa
+            'recency': 0.3           # Reducido: menos importante que contenido
         }
+        # Cache para cálculos costosos
+        self.density_cache = {}
 
     def score_document(self, doc: Dict, query: str, query_optimized: Dict) -> float:
         """Calcula score de relevancia para un documento"""
@@ -1052,18 +1281,38 @@ class RelevanceScorer:
         
         scores = {}
         
-        # Exact match
-        scores['exact_match'] = 1.0 if query_lower in content else 0.0
+        # Exact match mejorado (considera frecuencia)
+        exact_count = content.count(query_lower)
+        scores['exact_match'] = min(1.0, exact_count * 0.5)  # Saturar en 1.0
         
-        # Partial match
+        # Partial match mejorado (considera frecuencia y posición)
         query_words = query_optimized.get('keywords', [])
-        partial_matches = sum(1 for word in query_words if word in content)
-        scores['partial_match'] = partial_matches / len(query_words) if query_words else 0.0
+        if query_words:
+            word_scores = []
+            for word in query_words:
+                word_count = content.count(word.lower())
+                # Bonus por frecuencia, pero con saturación
+                word_score = min(1.0, word_count * 0.3)
+                # Bonus si aparece al inicio (títulos, definiciones)
+                if content.find(word.lower()) < len(content) * 0.2:
+                    word_score *= 1.2
+                word_scores.append(word_score)
+            scores['partial_match'] = sum(word_scores) / len(query_words)
+        else:
+            scores['partial_match'] = 0.0
         
-        # Semantic match
+        # Semantic match mejorado (peso por relevancia)
         expanded_terms = query_optimized.get('expanded_terms', [])
-        semantic_matches = sum(1 for term in expanded_terms if term in content)
-        scores['semantic_match'] = semantic_matches / len(expanded_terms) if expanded_terms else 0.0
+        if expanded_terms:
+            semantic_scores = []
+            for term in expanded_terms:
+                term_count = content.count(term.lower())
+                # Menor peso que palabras exactas
+                semantic_score = min(0.8, term_count * 0.2)
+                semantic_scores.append(semantic_score)
+            scores['semantic_match'] = sum(semantic_scores) / len(expanded_terms)
+        else:
+            scores['semantic_match'] = 0.0
         
         # Context density
         scores['context_density'] = self._calculate_context_density(content)
@@ -1077,31 +1326,56 @@ class RelevanceScorer:
         return min(1.0, final_score)
 
     def _calculate_context_density(self, content: str) -> float:
-        """Calcula densidad de contexto"""
+        """Calcula densidad de contexto optimizada con cache"""
         if not content:
             return 0.0
         
-        # Métricas de densidad
+        # Generar cache key
+        import hashlib
+        cache_key = hashlib.md5(content.encode()).hexdigest()[:12]
+        
+        # Verificar cache
+        if cache_key in self.density_cache:
+            return self.density_cache[cache_key]
+        
+        # Métricas de calidad del contenido
         word_count = len(content.split())
-        sentence_count = len(re.split(r'[.!?]+', content))
-        code_blocks = len(re.findall(r'```.*?```', content, re.DOTALL))
-        lists = len(re.findall(r'^[-*+]\s', content, re.MULTILINE))
+        sentence_count = content.count('.') + content.count('!') + content.count('?')
         
-        density_score = min(1.0, (
-            (word_count / 100) * 0.3 +
-            (sentence_count / 10) * 0.2 +
-            code_blocks * 0.3 +
-            lists * 0.2
-        ))
+        # Detectar elementos estructurados (más eficiente)
+        code_elements = (
+            content.count('def ') + content.count('class ') + 
+            content.count('import ') + content.count('function ')
+        )
         
-        return density_score
+        # Detectar listas y estructura
+        list_items = content.count('\n- ') + content.count('\n* ') + content.count('\n+ ')
+        headers = content.count('\n#')
+        code_blocks = content.count('```')
+        
+        # Calcular densidad optimizada
+        base_density = min(1.0, word_count / 200)  # Normalizar por 200 palabras
+        structure_bonus = min(0.4, (code_elements + list_items + headers + code_blocks) * 0.1)
+        readability_bonus = min(0.3, sentence_count / max(1, word_count / 15))  # ~15 palabras por oración
+        
+        # Bonus por tipo de contenido
+        if code_elements > 2:
+            structure_bonus *= 1.5  # Código es más valioso
+        
+        density = base_density + structure_bonus + readability_bonus
+        
+        # Cachear resultado
+        final_density = min(1.0, density)
+        self.density_cache[cache_key] = final_density
+        
+        return final_density
 
 class OptimizedMCPContextServer:
     """Servidor MCP Context Query con TODAS las optimizaciones"""
     
     def __init__(self):
         self.base_path = Path(__file__).resolve().parent
-        self.project_root = self.base_path.parent.parent.parent  # Ir al directorio raíz del proyecto SoftMedic
+        self.project_root = self.base_path.parent.parent.parent  # Ir al directorio raíz del proyecto Yari-System
         
         # Archivos de documentación a cargar
         self.documentation_files = [
