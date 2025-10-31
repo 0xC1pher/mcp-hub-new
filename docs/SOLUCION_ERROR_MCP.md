@@ -55,12 +55,12 @@ Edita `mcp_config.json` y deshabilita el v2.0:
 ```json
 {
   "mcpServers": {
-    "softmedic-context": {
+    "yari-medic-context": {
       "command": "python",
       "args": ["...\\optimized_mcp_server.py"],
       "disabled": false
     },
-    "softmedic-vector-v2": {
+    "yari-medic-vector-v2": {
       "command": "python",
       "args": ["...\\mcp_server.py"],
       "disabled": true  // ← Cambiar a true
@@ -193,7 +193,7 @@ He actualizado `mcp_core/mcp_server.py` para:
 
 ## 💡 Tip
 
-Mientras se instalan las dependencias, puedes seguir usando el MCP v1.0 (`softmedic-context`) que ya está funcionando.
+Mientras se instalan las dependencias, puedes seguir usando el MCP v1.0 (`yari-medic-context`) que ya está funcionando.
 
 ---
 

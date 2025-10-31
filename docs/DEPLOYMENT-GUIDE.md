@@ -2,7 +2,7 @@
 
 ## ✅ **IMPLEMENTACIÓN COMPLETA DE TODAS LAS OPTIMIZACIONES**
 
-El **Yari-System MCP Context Hub** ahora incluye **TODAS** las estrategias avanzadas definidas en `OPTIMIZATION-STRATEGIES.md`:
+El **Yari Medic MCP Context Hub** ahora incluye **TODAS** las estrategias avanzadas definidas en `OPTIMIZATION-STRATEGIES.md`:
 
 ### 🚀 **Optimizaciones Implementadas (100% Completas)**
 
@@ -170,9 +170,9 @@ python test-optimizations.py
 ```yaml
 # ~/.cursor/cascade/mcp-sources.yaml
 sources:
-  - name: softmedic-context-optimized
+  - name: yari-medic-context-optimized
     url: http://localhost:8081
-    description: "Yari-System MCP Context Hub v2.0 - Optimizado"
+    description: "Yari Medic MCP Context Hub v2.0 - Optimizado"
     enabled: true
     # Configuración adicional para optimizaciones
     optimizations:
@@ -303,9 +303,9 @@ PORT=3000 python servers/context-query/server.py
 ```yaml
 # ~/.cursor/cascade/mcp-sources.yaml
 sources:
-  - name: softmedic-context-optimized
+  - name: yari-medic-context-optimized
     url: http://localhost:8081
-    description: "Yari-System MCP Context Hub v2.0 - Optimizado"
+    description: "Yari Medic MCP Context Hub v2.0 - Optimizado"
     enabled: true
     optimizations:
       cache_enabled: true
@@ -347,4 +347,4 @@ python scripts/validate-index.py
 
 **🎯 IMPLEMENTACIÓN COMPLETA Y VALIDADA**
 
-El **Yari-System MCP Context Hub v2.0** incluye **TODAS** las optimizaciones avanzadas definidas en `OPTIMIZATION-STRATEGIES.md` y está listo para uso en producción con Windsurf/Cascade.
+El **Yari Medic MCP Context Hub v2.0** incluye **TODAS** las optimizaciones avanzadas definidas en `OPTIMIZATION-STRATEGIES.md` y está listo para uso en producción con Windsurf/Cascade.

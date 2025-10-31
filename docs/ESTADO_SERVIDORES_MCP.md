@@ -9,7 +9,7 @@
 
 ## 🚀 SERVIDORES MCP CONFIGURADOS
 
-### 1. **softmedic-context** ✅ FUNCIONANDO
+### 1. **yari-medic-context** ✅ FUNCIONANDO
 - **Ubicación:** `mcp-hub/servers/context-query/optimized_mcp_server.py`
 - **Estado:** ✅ Activo y funcionando
 - **Características:**
@@ -20,7 +20,7 @@
   - Resource monitoring
   - Fuzzy search y relevance scoring
 
-### 2. **softmedic-enhanced** ✅ FUNCIONANDO
+### 2. **yari-medic-enhanced** ✅ FUNCIONANDO
 - **Ubicación:** `mcp-hub/servers/context-query/enhanced_mcp_server.py`
 - **Estado:** ✅ Activo y funcionando
 - **Características:**
@@ -32,7 +32,7 @@
   - **54 archivos procesados** automáticamente
   - Objetivo Hit Rate: >85%
 
-### 3. **softmedic-mmcp** ⚠️ CONFIGURADO
+### 3. **yari-medic-mmcp** ⚠️ CONFIGURADO
 - **Ubicación:** `mmcp-hub/servers/context-query/optimized_mcp_server.py`
 - **Estado:** ⚠️ Configurado pero sin output visible
 - **Nota:** Puede estar funcionando silenciosamente
@@ -44,17 +44,17 @@
 ```json
 {
   "mcpServers": {
-    "softmedic-context": {
+    "yari-medic-context": {
       "command": "python",
       "args": ["...\\mcp-hub\\servers\\context-query\\optimized_mcp_server.py"],
       "cwd": "...\\mcp-hub\\servers\\context-query"
     },
-    "softmedic-enhanced": {
+    "yari-medic-enhanced": {
       "command": "python", 
       "args": ["...\\mcp-hub\\servers\\context-query\\enhanced_mcp_server.py"],
       "cwd": "...\\mcp-hub\\servers\\context-query"
     },
-    "softmedic-mmcp": {
+    "yari-medic-mmcp": {
       "command": "python",
       "args": ["...\\mmcp-hub\\servers\\context-query\\optimized_mcp_server.py"], 
       "cwd": "...\\mmcp-hub\\servers\\context-query"
@@ -67,20 +67,20 @@
 
 ## 🔍 DIFERENCIAS ENTRE SERVIDORES
 
-### **softmedic-context** (Optimizado)
+### **yari-medic-context** (Optimizado)
 - ✅ Algoritmo de chunking mejorado (-60% storage)
 - ✅ Scoring multifactor (+40% precisión)
 - ✅ Cache optimizado (+300% velocidad)
 - ✅ Todas las optimizaciones aplicadas
 
-### **softmedic-enhanced** (Avanzado)
+### **yari-medic-enhanced** (Avanzado)
 - ✅ Sistema ACE completo
 - ✅ Detección automática de duplicados
 - ✅ Alimentación automática de archivos
 - ✅ Cache inteligente con >85% hit rate
 - ✅ Procesamiento de 54 archivos automático
 
-### **softmedic-mmcp** (Básico)
+### **yari-medic-mmcp** (Básico)
 - ✅ Servidor de respaldo
 - ✅ Funcionalidad básica MCP
 - ✅ Configurado correctamente
@@ -89,7 +89,7 @@
 
 ## 📊 LOGS DE FUNCIONAMIENTO
 
-### softmedic-context:
+### yari-medic-context:
 ```
 ✅ Servidor MCP Context Query Optimizado iniciado
 ✅ Token Budgeting Inteligente
@@ -101,7 +101,7 @@
 ✅ Fuzzy Search y Relevance Scoring
 ```
 
-### softmedic-enhanced:
+### yari-medic-enhanced:
 ```
 ✅ Sistema ACE (Análisis, Curación, Evolución)
 ✅ Detección de duplicación de código
@@ -132,9 +132,9 @@
 - **Múltiples algoritmos** para diferentes necesidades
 
 ### 📈 PERFORMANCE:
-- **softmedic-context:** Optimizado para velocidad y precisión
-- **softmedic-enhanced:** Avanzado con sistema ACE completo
-- **softmedic-mmcp:** Respaldo confiable
+- **yari-medic-context:** Optimizado para velocidad y precisión
+- **yari-medic-enhanced:** Avanzado con sistema ACE completo
+- **yari-medic-mmcp:** Respaldo confiable
 
 ---
 

@@ -105,7 +105,7 @@ python enhanced_mcp_server.py
 ```json
 {
   "mcpServers": {
-    "softmedic-context-enhanced": {
+    "yari-medic-context-enhanced": {
       "command": "python",
       "args": ["enhanced_mcp_server.py"],
       "cwd": "ruta/completa/servers/context-query"

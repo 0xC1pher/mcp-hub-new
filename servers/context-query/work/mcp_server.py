@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Servidor MCP Context Query para Yari-System - Versión Optimizada 2.0
+Servidor MCP Context Query para Yari Medic - Versión Optimizada 2.0
 Implementa protocolo MCP estándar con JSON-RPC sobre stdio
 """
 
@@ -118,7 +118,7 @@ class MCPContextServer:
                 }
             },
             "serverInfo": {
-                "name": "softmedic-context",
+                "name": "yari-medic-context",
                 "version": "2.0.0-optimized"
             }
         }

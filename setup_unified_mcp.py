@@ -42,7 +42,7 @@ def setup_unified_mcp():
     print("\n✅ Configuración completada!")
     print("\n📋 Próximos pasos:")
     print("1. Reinicia Windsurf para cargar la nueva configuración")
-    print("2. Usa el servidor 'softmedic-unified' desde Windsurf")
+    print("2. Usa el servidor 'yari-medic-unified' desde Windsurf")
     print("3. Ejecuta test: python test_unified_mcp.py")
 
 def create_directories(mcp_hub: Path):
@@ -71,7 +71,7 @@ def configure_windsurf(config_path: Path, mcp_hub: Path):
     # Configuración unificada
     config = {
         "mcpServers": {
-            "softmedic-unified": {
+            "yari-medic-unified": {
                 "command": "python",
                 "args": [str(mcp_hub / "unified_mcp_server.py")],
                 "cwd": str(mcp_hub),
@@ -96,7 +96,7 @@ def configure_windsurf(config_path: Path, mcp_hub: Path):
     if "mcpServers" not in existing_config:
         existing_config["mcpServers"] = {}
     
-    existing_config["mcpServers"]["softmedic-unified"] = config["mcpServers"]["softmedic-unified"]
+    existing_config["mcpServers"]["yari-medic-unified"] = config["mcpServers"]["yari-medic-unified"]
     
     # Guardar configuración
     with open(config_path, 'w', encoding='utf-8') as f:
@@ -261,7 +261,7 @@ def cleanup_old_servers():
     
     print("   ℹ️ Los servidores anteriores se mantienen para compatibilidad")
     print("   ℹ️ El servidor unificado combina todas las funcionalidades")
-    print("   ℹ️ Puedes usar 'softmedic-unified' como servidor principal")
+    print("   ℹ️ Puedes usar 'yari-medic-unified' como servidor principal")
 
 if __name__ == "__main__":
     setup_unified_mcp()

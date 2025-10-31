@@ -10,16 +10,42 @@ import os
 import time
 import hashlib
 import sqlite3
-import zstandard as zstd
-import msgpack
 from typing import Dict, List, Any, Optional
-import numpy as np
+
+# Imports opcionales con fallbacks
+try:
+    import zstandard as zstd
+    ZSTD_AVAILABLE = True
+except ImportError:
+    ZSTD_AVAILABLE = False
+    print("⚠️ zstandard no disponible - usando compresión básica")
+
+try:
+    import msgpack
+    MSGPACK_AVAILABLE = True
+except ImportError:
+    MSGPACK_AVAILABLE = False
+    print("⚠️ msgpack no disponible - usando JSON")
+
+try:
+    import numpy as np
+    NUMPY_AVAILABLE = True
+except ImportError:
+    NUMPY_AVAILABLE = False
+    print("⚠️ numpy no disponible - funcionalidad limitada")
 
 class MemoryContextMCP:
     def __init__(self, db_path: str = "memory_context.db"):
         self.db_path = db_path
-        self.compressor = zstd.ZstdCompressor(level=3)
-        self.decompressor = zstd.ZstdDecompressor()
+        
+        # Configurar compresión según disponibilidad
+        if ZSTD_AVAILABLE:
+            self.compressor = zstd.ZstdCompressor(level=3)
+            self.decompressor = zstd.ZstdDecompressor()
+        else:
+            self.compressor = None
+            self.decompressor = None
+        
         self.init_database()
         
     def init_database(self):

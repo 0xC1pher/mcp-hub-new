@@ -13,18 +13,18 @@
 ```json
 {
   "mcpServers": {
-    "softmedic-context": {
+    "yari-medic-context": {
       "command": "python",
       "args": ["...\\mcp-hub\\servers\\context-query\\optimized_mcp_server.py"],
       "cwd": "...\\mcp-hub\\servers\\context-query",
       "disabled": false
     },
-    "softmedic-vector-v2": {
+    "yari-medic-vector-v2": {
       "command": "python",
       "args": ["...\\mcp_core\\mcp_server.py"],
-      "cwd": "...\\Yari-System -Imca",
+      "cwd": "...\\Yari Medic -Imca",
       "env": {
-        "PYTHONPATH": "...\\Yari-System -Imca"
+        "PYTHONPATH": "...\\Yari Medic -Imca"
       },
       "disabled": false
     }
@@ -33,8 +33,8 @@
 ```
 
 **Ahora tienes 2 servidores MCP:**
-- `softmedic-context`: Sistema v1.0 (anterior)
-- `softmedic-vector-v2`: Sistema v2.0 (nuevo, optimizado)
+- `yari-medic-context`: Sistema v1.0 (anterior)
+- `yari-medic-vector-v2`: Sistema v2.0 (nuevo, optimizado)
 
 ---
 
@@ -267,13 +267,13 @@ python benchmark_mcp.py                   # Comparar v1 vs v2
 
 ```bash
 # Indexación diaria (2 AM)
-0 2 * * * cd /path/to/softmedic && python manage.py mcp_index index
+0 2 * * * cd /path/to/yari-medic && python manage.py mcp_index index
 
 # Optimización semanal (Domingo 3 AM)
-0 3 * * 0 cd /path/to/softmedic && python manage.py mcp_index optimize
+0 3 * * 0 cd /path/to/yari-medic && python manage.py mcp_index optimize
 
 # Health check diario (4 AM)
-0 4 * * * cd /path/to/softmedic && python manage.py mcp_index health >> /var/log/mcp_health.log
+0 4 * * * cd /path/to/yari-medic && python manage.py mcp_index health >> /var/log/mcp_health.log
 ```
 
 ---
@@ -284,7 +284,7 @@ python benchmark_mcp.py                   # Comparar v1 vs v2
 ```python
 from mcp_core import get_mcp_service
 
-mcp = get_mcp_service(project_root='/path/to/softmedic')
+mcp = get_mcp_service(project_root='/path/to/yari-medic')
 response = mcp.query("cómo crear un paciente")
 
 for result in response['results']:

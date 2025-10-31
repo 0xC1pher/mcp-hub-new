@@ -4,7 +4,7 @@
   "metadata": {
     "description": "Servidor MCP mejorado con Context Feedback System que previene alucinaciones y mantiene coherencia del proyecto.",
     "healthcheck": "/health",
-    "maintainer": "SoftMedic Team",
+    "maintainer": "Yari Medic Team",
     "features": [
       "Prevención de alucinaciones",
       "Análisis de código existente obligatorio",

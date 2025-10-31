@@ -15,19 +15,18 @@ from typing import Dict, Any, List, Optional
 
 logger = logging.getLogger(__name__)
 
+# Agregar rutas al path para imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "servers" / "context-query"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "optimized"))
+
 # Importar el sistema de retroalimentación
 try:
     from context_feedback_system import ContextFeedbackSystem, TaskPriority
-    from optimized_mcp_server import OptimizedMCPContextServer
-    from intelligent_cache_system import IntelligentCacheSystem
     FEEDBACK_AVAILABLE = True
-    CACHE_AVAILABLE = True
-    logger.info("Context Feedback System y Cache Inteligente cargados correctamente")
+    logger.info("Context Feedback System cargado correctamente")
 except ImportError as e:
-    logger.warning(f"Sistemas avanzados no disponibles: {e}")
-    from optimized_mcp_server import OptimizedMCPContextServer
+    logger.warning(f"Context Feedback System no disponible: {e}")
     FEEDBACK_AVAILABLE = False
-    CACHE_AVAILABLE = False
     
     # Crear clases dummy para compatibilidad
     class TaskPriority:
@@ -35,6 +34,25 @@ except ImportError as e:
         MEDIUM = "medium"
         LOW = "low"
         CRITICAL = "critical"
+    
+    class ContextFeedbackSystem:
+        def __init__(self, *args, **kwargs):
+            pass
+
+try:
+    from optimized_mcp_server import OptimizedMCPContextServer
+    logger.info("OptimizedMCPContextServer cargado correctamente")
+except ImportError as e:
+    logger.warning(f"OptimizedMCPContextServer no disponible: {e}")
+    # Crear clase base mínima
+    class OptimizedMCPContextServer:
+        def __init__(self):
+            self.base_path = Path(__file__).parent
+        
+        def handle_tools_call(self, params):
+            return {"content": [{"type": "text", "text": "Servidor en modo básico"}]}
+
+CACHE_AVAILABLE = False
 
 
 class HallucinationDetector:

@@ -110,7 +110,7 @@ class RelevanceScorer:
 ```json
 {
   "mcpServers": {
-    "softmedic-context": {
+    "yari-medic-context": {
       "command": "python",
       "args": ["ruta/completa/optimized_mcp_server.py"],
       "cwd": "ruta/completa/servers/context-query"

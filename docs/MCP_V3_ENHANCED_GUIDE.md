@@ -192,7 +192,7 @@ response = server.handle_request({
     'params': {
         'name': 'grok_analysis',
         'arguments': {
-            'query': 'optimización proceso diagnóstico Yari-System'
+            'query': 'optimización proceso diagnóstico Yari Medic'
         }
     }
 })
@@ -245,7 +245,7 @@ response = server.handle_request({
 - **Importancia**: Cálculo automático basado en contenido médico
 - **Persistencia**: Almacenamiento SQLite con indexación
 
-## 📚 Integración con Yari-System
+## 📚 Integración con Yari Medic
 
 ### Compatibilidad Médica:
 - ✅ **Detección automática** de contexto médico
@@ -286,6 +286,6 @@ response = server.handle_request({
 ✅ **Memoria persistente** avanzada
 ✅ **Enhancement automático** de respuestas
 ✅ **Rendimiento optimizado** (+1% overhead, +128% información)
-✅ **Integración perfecta** con Yari-System
+✅ **Integración perfecta** con Yari Medic
 
 **El sistema MCP más avanzado para análisis médico inteligente, manteniendo toda la funcionalidad existente mientras agrega capacidades de razonamiento de próxima generación.**

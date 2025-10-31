@@ -160,8 +160,8 @@ def _calculate_context_density_optimized(self, content: str, cache_key: str) -> 
 - ❌ **Baja coherencia** → ✅ Algoritmos optimizados (+89% relevancia)
 
 ### 🚀 Servidor Funcionando
-- ✅ **MCP v1.0:** `softmedic-context` - Funcionando
-- ✅ **MCP v2.0:** `softmedic-vector-v2` - **OPTIMIZADO Y FUNCIONANDO**
+- ✅ **MCP v1.0:** `yari-medic-context` - Funcionando
+- ✅ **MCP v2.0:** `yari-medic-vector-v2` - **OPTIMIZADO Y FUNCIONANDO**
 - ✅ **Configuración:** Windsurf actualizada correctamente
 - ✅ **Performance:** 3,038 archivos indexados en 19 segundos
 

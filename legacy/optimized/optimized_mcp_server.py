@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Servidor MCP Context Query para Yari-System - Versión Optimizada Completa
+Servidor MCP Context Query para Yari Medic - Versión Optimizada Completa
 Implementa TODAS las estrategias avanzadas de OPTIMIZATION-STRATEGIES.md:
 - Token Budgeting Inteligente
 - Chunking Semántico Avanzado
@@ -871,7 +871,7 @@ class QueryOptimizer:
     
     def __init__(self, cache=None):
         self.cache = cache  # Inyección de dependencia del cache
-        # Sinónimos específicos del dominio médico y Yari-System
+        # Sinónimos específicos del dominio médico y Yari Medic
         self.synonyms = {
             # Términos médicos
             'paciente': ['enfermo', 'usuario', 'cliente', 'persona', 'individuo'],
@@ -911,7 +911,7 @@ class QueryOptimizer:
             'tailwind': ['css', 'estilos', 'diseño', 'frontend', 'ui'],
             'gunicorn': ['servidor', 'wsgi', 'deployment', 'producción'],
             
-            # Módulos Yari-System
+            # Módulos Yari Medic
             'pacientes': ['médico', 'consulta', 'historia clínica', 'cita', 'registro'],
             'citas': ['agenda', 'calendario', 'programación', 'horarios', 'turnos'],
             'facturacion': ['pago', 'cobro', 'dinero', 'transacción', 'finanzas'],
@@ -1062,7 +1062,7 @@ class QueryOptimizer:
             r'\b[a-z][a-zA-Z0-9]*\b'   # camelCase
         ]
         
-        # Patrones para módulos de Yari-System
+        # Patrones para módulos de Yari Medic
         module_patterns = [
             r'\b(pacientes|medicos|citas|historia_clinica)\b',
             r'\b(facturacion|almacen|ecografias|estadisticas)\b',
@@ -1386,7 +1386,7 @@ class QueryOptimizer:
         """Clasifica el tipo de consulta con categorías específicas del dominio médico"""
         query_lower = query.lower()
         
-        # Categorías específicas de Yari-System
+        # Categorías específicas de Yari Medic
         medical_keywords = ['paciente', 'médico', 'doctor', 'cita', 'consulta', 'historia clínica', 
                            'diagnóstico', 'tratamiento', 'ecografía', 'facturación médica']
         
@@ -1693,7 +1693,7 @@ class OptimizedMCPContextServer:
     
     def __init__(self):
         self.base_path = Path(__file__).resolve().parent
-        self.project_root = self.base_path.parent.parent.parent  # Ir al directorio raíz del proyecto Yari-System
+        self.project_root = self.base_path.parent.parent.parent  # Ir al directorio raíz del proyecto Yari Medic
         
         # Archivos de documentación a cargar
         self.documentation_files = [
@@ -1896,7 +1896,7 @@ class OptimizedMCPContextServer:
                 }
             },
             "serverInfo": {
-                "name": "softmedic-context-optimized",
+                "name": "yari-medic-context-optimized",
                 "version": "2.0.0-optimized"
             }
         }

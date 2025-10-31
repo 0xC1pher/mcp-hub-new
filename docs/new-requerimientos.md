@@ -635,13 +635,13 @@ manuales/
 implementar  nueva bd en la nube el manual esta dentro de el archivo llamado #turso-manual.md
 
 Key= eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJKUzNsT0tiZUVmQ291b2FIS2ROVi1nIn0.40hk9EUBwGro4bqfZyUYAojsV6Yu_Ghp_u1sq-oniCsJfohb4knR2Yrdl1estehHJ8H6GWkFs7qP-4Tn7gDLAA
-URL= libsql://softmedicdb-drcoa.aws-us-east-1.turso.io
+URL= libsql://yari-medicdb-drcoa.aws-us-east-1.turso.io
 
 # 🎨 GUÍA DE MIGRACIÓN UI - SOFTMEDIC
 
 ## 📋 Resumen de Cambios
 
-Se ha implementado un **sistema de diseño moderno y atractivo** para mejorar significativamente la experiencia de usuario (UX) del sistema Yari-System, especialmente para médicos y secretarias.
+Se ha implementado un **sistema de diseño moderno y atractivo** para mejorar significativamente la experiencia de usuario (UX) del sistema Yari Medic, especialmente para médicos y secretarias.
 
 ## ✨ Nuevas Características
 
@@ -782,7 +782,7 @@ Si encuentras algún problema:
 
 ---
 
-**¡El sistema Yari-System ahora tiene una interfaz moderna, atractiva y fácil de usar! 🎉**
+**¡El sistema Yari Medic ahora tiene una interfaz moderna, atractiva y fácil de usar! 🎉**
 
 # Turso Database Manual
 

@@ -288,7 +288,7 @@ python manage.py mcp_index health
 from mcp_core import get_mcp_service
 
 # Inicializar servicio
-mcp = get_mcp_service(project_root='/path/to/softmedic')
+mcp = get_mcp_service(project_root='/path/to/yari-medic')
 
 # Indexar proyecto
 stats = mcp.initialize_index()
@@ -528,13 +528,13 @@ Verifica salud del sistema
 #### 1. **Indexación Regular**
 ```bash
 # Cron job diario
-0 2 * * * cd /path/to/softmedic && python manage.py mcp_index index
+0 2 * * * cd /path/to/yari-medic && python manage.py mcp_index index
 ```
 
 #### 2. **Optimización Semanal**
 ```bash
 # Cron job semanal
-0 3 * * 0 cd /path/to/softmedic && python manage.py mcp_index optimize
+0 3 * * 0 cd /path/to/yari-medic && python manage.py mcp_index optimize
 ```
 
 #### 3. **Monitoreo de Salud**
@@ -720,7 +720,7 @@ Para contribuir al sistema MCP:
 
 ## 📄 Licencia
 
-Parte del proyecto Yari-System - Sistema de Gestión Médica
+Parte del proyecto Yari Medic - Sistema de Gestión Médica
 
 ---
 

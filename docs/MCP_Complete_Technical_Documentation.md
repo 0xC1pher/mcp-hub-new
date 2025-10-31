@@ -1,14 +1,14 @@
-# Documentación Técnica Completa del MCP Yari-System
+# Documentación Técnica Completa del MCP Yari Medic
 
 ## Arquitectura General
 
 ### Visión General
-El **MCP (Model Context Protocol) Yari-System** es un servidor HTTP especializado que proporciona contexto inteligente sobre el proyecto Yari-System a asistentes de IA. Implementa múltiples capas de optimización para reducir alucinaciones y mejorar la precisión de las respuestas.
+El **MCP (Model Context Protocol) Yari Medic** es un servidor HTTP especializado que proporciona contexto inteligente sobre el proyecto Yari Medic a asistentes de IA. Implementa múltiples capas de optimización para reducir alucinaciones y mejorar la precisión de las respuestas.
 
 ### Arquitectura de Alto Nivel
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    MCP Yari-System Server                         │
+│                    MCP Yari Medic Server                         │
 ├─────────────────────────────────────────────────────────────────┤
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────┐ │
 │  │ Spec-Driven │  │     ACE     │  │  Búsqueda   │  │  Cache  │ │
@@ -303,7 +303,7 @@ mcp-hub/
 
 ## Conclusión
 
-El MCP Yari-System combina **10 técnicas especializadas** que trabajan en conjunto para proporcionar análisis de contexto de ultra-alta precisión. La integración de **Spec-Driven Development** con **ACE** y optimizaciones tradicionales resulta en un sistema que:
+El MCP Yari Medic combina **10 técnicas especializadas** que trabajan en conjunto para proporcionar análisis de contexto de ultra-alta precisión. La integración de **Spec-Driven Development** con **ACE** y optimizaciones tradicionales resulta en un sistema que:
 
 - **Reduce alucinaciones en 70-80%** mediante contexto basado en especificaciones reales
 - **Evoluciona automáticamente** sin requerir feedback manual continuo

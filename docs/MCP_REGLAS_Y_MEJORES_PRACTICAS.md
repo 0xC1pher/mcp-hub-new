@@ -1,6 +1,6 @@
 # 📋 Reglas y Mejores Prácticas - MCP v2.0
 
-## Sistema de Base de Datos Vectorizada para Yari-System
+## Sistema de Base de Datos Vectorizada para Yari Medic
 
 ---
 
@@ -150,7 +150,7 @@ min_similarity = 0.5  # 50% de similitud mínima
 
 ```bash
 # Cron job diario a las 2 AM
-0 2 * * * cd /path/to/softmedic && python manage.py mcp_index index
+0 2 * * * cd /path/to/yari-medic && python manage.py mcp_index index
 ```
 
 **Beneficios:**
@@ -221,7 +221,7 @@ response = mcp.query(
 
 ```bash
 # Cron job semanal (domingos a las 3 AM)
-0 3 * * 0 cd /path/to/softmedic && python manage.py mcp_index optimize
+0 3 * * 0 cd /path/to/yari-medic && python manage.py mcp_index optimize
 ```
 
 **Acciones de Optimización:**
@@ -587,4 +587,4 @@ response = mcp.query(query, search_mode='semantic')
 
 **Última actualización:** 2025-01-19  
 **Versión:** 2.0.0  
-**Autor:** Sistema MCP Optimizado para Yari-System
+**Autor:** Sistema MCP Optimizado para Yari Medic

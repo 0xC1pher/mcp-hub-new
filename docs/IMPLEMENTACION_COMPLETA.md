@@ -80,10 +80,10 @@ Sin monitoreo   | Completo          | +100%
 ```json
 {
   "mcpServers": {
-    "softmedic-context": {
+    "yari-medic-context": {
       "command": "python",
-      "args": ["C:\\Users\\0x4171341\\Desktop\\CONSULTORIO\\Yari-System -Imca\\mcp-hub\\servers\\context-query\\optimized_mcp_server.py"],
-      "cwd": "C:\\Users\\0x4171341\\Desktop\\CONSULTORIO\\Yari-System -Imca\\mcp-hub\\servers\\context-query"
+      "args": ["C:\\Users\\0x4171341\\Desktop\\CONSULTORIO\\Yari Medic -Imca\\mcp-hub\\servers\\context-query\\optimized_mcp_server.py"],
+      "cwd": "C:\\Users\\0x4171341\\Desktop\\CONSULTORIO\\Yari Medic -Imca\\mcp-hub\\servers\\context-query"
     }
   }
 }
@@ -220,7 +220,7 @@ RATE_LIMIT_PER_SEC = 10   # Límite de rate limiting
 
 **🎯 IMPLEMENTACIÓN COMPLETA Y VALIDADA**
 
-El **Yari-System MCP Context Hub v2.0 Optimizado** incluye **TODAS** las optimizaciones avanzadas y está listo para uso en producción con Cursor.
+El **Yari Medic MCP Context Hub v2.0 Optimizado** incluye **TODAS** las optimizaciones avanzadas y está listo para uso en producción con Cursor.
 
 # imcompletos 
 

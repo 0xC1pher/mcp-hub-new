@@ -1,6 +1,6 @@
 # 🚀 Sistema MCP Optimizado v2.0
 
-## Base de Datos Vectorizada para Yari-System
+## Base de Datos Vectorizada para Yari Medic
 
 ---
 
@@ -106,7 +106,7 @@ python manage.py mcp_index health
 from mcp_core import get_mcp_service
 
 # Inicializar
-mcp = get_mcp_service(project_root='/path/to/softmedic')
+mcp = get_mcp_service(project_root='/path/to/yari-medic')
 
 # Indexar
 stats = mcp.initialize_index()
@@ -223,10 +223,10 @@ Componentes:
 
 ```bash
 # Cron job diario
-0 2 * * * cd /path/to/softmedic && python manage.py mcp_index index
+0 2 * * * cd /path/to/yari-medic && python manage.py mcp_index index
 
 # Cron job semanal
-0 3 * * 0 cd /path/to/softmedic && python manage.py mcp_index optimize
+0 3 * * 0 cd /path/to/yari-medic && python manage.py mcp_index optimize
 ```
 
 ### Manual
@@ -404,7 +404,7 @@ response = mcp.query("configuración de base de datos")
 
 ## 📄 Licencia
 
-Parte del proyecto Yari-System - Sistema de Gestión Médica
+Parte del proyecto Yari Medic - Sistema de Gestión Médica
 
 ---
 

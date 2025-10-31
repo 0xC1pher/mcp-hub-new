@@ -1,7 +1,7 @@
 # Guía Técnica para Mejorar el MCP con Estrategias de Agentic Context Engineering (ACE)
 
 ## 1. Análisis de Problemas Actuales en el MCP
-El servidor MCP actual (`softmedic-context`) implementa una búsqueda estática basada en keywords predefinidos, con optimizaciones como fuzzy search y chunking semántico. Sin embargo, presenta limitaciones que causan "alucinaciones" (respuestas irrelevantes o incorrectas):
+El servidor MCP actual (`yari-medic-context`) implementa una búsqueda estática basada en keywords predefinidos, con optimizaciones como fuzzy search y chunking semántico. Sin embargo, presenta limitaciones que causan "alucinaciones" (respuestas irrelevantes o incorrectas):
 
 - **Búsqueda Estática sin Aprendizaje:** El índice `keyword-to-sections.json` es fijo y no se actualiza con consultas reales. Esto lleva a matches irrelevantes porque no aprende de patrones de uso (e.g., una query sobre "autenticación" podría devolver secciones de "seguridad" genérica en lugar de detalles específicos de login).
 
@@ -72,7 +72,7 @@ Inspirado en el paper "Agentic Context Engineering: Evolving Contexts for Self-I
 
 Esta guía establece el foundation. Proceder con implementación.
 # implementado 
-He implementado exitosamente las estrategias de Agentic Context Engineering (ACE) basadas en el paper analizado para reducir alucinaciones en el MCP Yari-System.
+He implementado exitosamente las estrategias de Agentic Context Engineering (ACE) basadas en el paper analizado para reducir alucinaciones en el MCP Yari Medic.
 
 🎯 Cambios Principales Realizados:
 1. Sistema de Feedback ✅

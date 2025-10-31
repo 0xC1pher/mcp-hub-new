@@ -60,4 +60,4 @@ Las pruebas muestran:
 
 ---
 
-**¡El MCP Hub está listo para proporcionar contexto inteligente a tu proyecto Yari-System!** 🎉
+**¡El MCP Hub está listo para proporcionar contexto inteligente a tu proyecto Yari Medic!** 🎉
