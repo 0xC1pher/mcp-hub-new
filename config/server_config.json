@@ -1,0 +1,25 @@
+{
+  "cache": {
+    "l1_size": 100,
+    "l2_size": 1000,
+    "disk_size": 10000,
+    "ttl_seconds": 3600
+  },
+  "chunking": {
+    "chunk_size": 1000,
+    "overlap": 200,
+    "min_chunk_size": 50
+  },
+  "scoring": {
+    "exact_match_weight": 2.0,
+    "partial_match_weight": 1.5,
+    "context_density_weight": 0.8,
+    "relevance_threshold": 0.3
+  },
+  "ace_system": {
+    "enabled": true,
+    "duplicate_detection": true,
+    "contextual_analysis": true,
+    "evolution_learning": true
+  }
+}

@@ -1,9 +1,0 @@
-[
-  {
-    "query": "test query",
-    "response": "test response",
-    "helpful": true,
-    "suggestion": "Great response",
-    "timestamp": 1760121682.551599
-  }
-]

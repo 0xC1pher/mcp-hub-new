@@ -10,7 +10,13 @@ import os
 import time
 import hashlib
 import sqlite3
+from pathlib import Path
 from typing import Dict, List, Any, Optional
+
+# Agregar directorio raíz de mcp-hub al PYTHONPATH
+current_dir = Path(__file__).resolve().parent
+mcp_hub_root = current_dir.parent.parent  # Subir dos niveles: memory_context -> core -> mcp-hub
+sys.path.insert(0, str(mcp_hub_root))
 
 # Imports opcionales con fallbacks
 try:
@@ -258,12 +264,69 @@ class MemoryContextMCPServer:
             "result": {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {
-                    "tools": {}
+                    "tools": {
+                        "listChanged": True
+                    }
                 },
                 "serverInfo": {
                     "name": "memory-context-mcp",
                     "version": "1.0.0"
-                }
+                },
+                "tools": [
+                    {
+                        "name": "store_context",
+                        "description": "Almacena contexto en memoria persistente",
+                        "inputSchema": {
+                            "type": "object",
+                            "properties": {
+                                "context_data": {"type": "object"}
+                            },
+                            "required": ["context_data"]
+                        }
+                    },
+                    {
+                        "name": "retrieve_context",
+                        "description": "Recupera contexto por hash",
+                        "inputSchema": {
+                            "type": "object",
+                            "properties": {
+                                "context_hash": {"type": "string"}
+                            },
+                            "required": ["context_hash"]
+                        }
+                    },
+                    {
+                        "name": "search_contexts",
+                        "description": "Busca contextos por query",
+                        "inputSchema": {
+                            "type": "object",
+                            "properties": {
+                                "query": {"type": "string"},
+                                "limit": {"type": "integer", "default": 10}
+                            },
+                            "required": ["query"]
+                        }
+                    },
+                    {
+                        "name": "get_stats",
+                        "description": "Obtiene estadísticas de memoria",
+                        "inputSchema": {
+                            "type": "object",
+                            "properties": {}
+                        }
+                    },
+                    {
+                        "name": "cleanup_contexts",
+                        "description": "Limpia contextos antiguos",
+                        "inputSchema": {
+                            "type": "object",
+                            "properties": {
+                                "max_age_days": {"type": "integer", "default": 30},
+                                "min_access_count": {"type": "integer", "default": 1}
+                            }
+                        }
+                    }
+                ]
             }
         }
     
