@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Documentation
+MCP_CONFIG_FIX.md
+
 # Virtual Environment
 venv/
 env/
