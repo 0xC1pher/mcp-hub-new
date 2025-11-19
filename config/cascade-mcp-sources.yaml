@@ -2,7 +2,7 @@
 # Ubicación: ~/.cursor/cascade/mcp-sources.yaml
 
 sources:
-  - name: softmedic-context
+  - name: yari-context
     url: http://localhost:8081
-    description: "Contexto inteligente del proyecto SoftMedic"
+    description: "Contexto inteligente del proyecto"
     enabled: true

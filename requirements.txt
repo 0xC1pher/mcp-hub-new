@@ -1,0 +1,35 @@
+# ============================================
+# MCP Hub v5.0 - Requirements
+# Python 3.8+ (Recomendado: Python 3.11)
+# ============================================
+
+# MCP Server v6.0 Requirements
+# Updated: 2025-11-18
+
+# Core dependencies
+numpy>=1.21.0
+msgpack>=1.0.5
+zstandard>=0.19.0
+
+# v5: Vector search and embeddings
+hnswlib>=0.7.0
+sentence-transformers>=2.2.0
+tiktoken>=0.5.0
+
+# v5: MP4 storage (using struct, no external lib needed for basic ops)
+# pymp4>=1.4.0  # Optional: for robust parsing (currently using struct)
+
+# v6: Session memory (no additional deps)
+# Uses built-in: asyncio, json, pathlib
+
+# v6: Code indexing
+# Uses built-in: ast module for Python parsing
+
+# v6: TOON format
+# Custom implementation in core/shared/toon_serializer.py
+# No external package needed - our implementation is optimized for MCP
+
+# Development/Optional
+# pytest>=7.0.0
+# black>=22.0.0
+# mypy>=0.990e>=1.0.0

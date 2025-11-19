@@ -1,24 +1,26 @@
-INSTRUCCIONES PARA USO DEL MCP CONTEXT-QUERY EN SOFTMEDIC
+INSTRUCCIONES PARA USO DEL MCP CONTEXT-QUERY (MEMORIA & CONTEXTO)
 
-Cuando respondas preguntas sobre el proyecto Yari Medic, prioriza el uso de la herramienta 'context.query' para obtener información precisa y actualizada sobre:
+El MCP solo debe fundamentar sus respuestas en memoria técnica y contexto operativo.
+Para temas de negocio o producto, limita el conocimiento a lo documentado en
+feature.md o a lo que el usuario exprese durante la entrevista inicial.
 
-1. MODELO DE NEGOCIO - Usa para preguntas sobre ingresos, valor, mercado, escalabilidad
-2. VISIÓN DE PRODUCTO - Usa para objetivos, métricas, roadmap, hoja de ruta
-3. ARQUITECTURA TÉCNICA - Usa para stack, patrones, límites, base de datos
-4. CONVENCIONES DE CÓDIGO - Usa para estilo, estructura, naming, testing
-5. FLUJO DE TRABAJO - Usa para desarrollo, PRs, CI/CD, despliegue
-6. RESTRICCIONES - Usa para límites, prohibiciones, seguridad, compliance
+FUENTES PERMITIDAS:
+1. `feature.md`: reglas críticas, flujos obligatorios y capacidades avanzadas.
+2. Documentos de memoria (`model.md`, `checklist.md`, `changelog.md`).
+3. Respuestas capturadas en la entrevista (payload de `ProjectKnowledgeManager`).
+4. Historial de feedback técnico y métricas registradas por el orquestador.
 
-DIRECTRICES DE USO:
-- Formula preguntas específicas y concretas
-- NO pidas "todo el contexto" - sé preciso
-- Si la respuesta no es relevante, pide aclaración al usuario
-- Usa el contexto para fundamentar tus respuestas técnicas
-- Mantén consistencia con las convenciones documentadas
+DIRECTRICES DE CONSULTA:
+- Formula preguntas específicas (secciones, reglas, pasos concretos).
+- Evita pedidos genéricos como "dame todo"; prioriza fragmentos relevantes.
+- Si el contexto no responde la duda, solicita aclaraciones al usuario.
+- Cuando se mencione negocio, confirma que la información provenga de feature.md
+  o de la entrevista; de lo contrario, indica que no hay datos disponibles.
+- Usa el contexto recuperado para justificar recomendaciones técnicas.
 
 EJEMPLOS DE BUENAS PREGUNTAS:
-✅ "¿Cómo se estructuran los modelos Django?"
-✅ "¿Cuáles son las restricciones de seguridad?"
-✅ "¿Cómo funciona el flujo de despliegue?"
-❌ "¿Qué sabes del proyecto?"
-❌ "Dame toda la información"
+✅ "¿Qué dice feature.md sobre virtual chunks y almacenamiento MP4?"
+✅ "¿Cuáles son las reglas críticas listadas en feature.md?"
+✅ "¿Qué contexto proporcionó la entrevista sobre restricciones técnicas?"
+❌ "¿Cuál es la estrategia comercial del proyecto?"
+❌ "Dame toda la información del repositorio"

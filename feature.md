@@ -1,4 +1,449 @@
-# Feature Requirements - MCP Hub Enhanced
+# MCP Hub Features - v5 & v6 Specifications
+
+## Version Overview
+
+- **v5.0.0:** Production - Pure retrieval system
+- **v6.0.0:** Planned - Retrieval + session memory
+
+---
+
+## v5 Features (Current - Production Ready)
+
+### Core Principles
+
+1. Memory Only - No business logic
+2. Single Source of Truth - model.md, checklist.md, changelog.md only
+3. Retrieval-First - Return evidence, never invent
+4. Provenance Mandatory - Every response includes source metadata
+5. Anti-Hallucination - Confidence thresholds and abstention
+
+### Storage System
+
+**MP4-Based Vector Storage**
+- Custom ISO BMFF (MP4) container format
+- Structure:
+  - ftyp: File type identifier (mcpv)
+  - moov/udta/mcpi: Index metadata (JSON)
+  - mdat: Vector embeddings + HNSW index
+- Virtual chunks reference source files (no text duplication)
+- Memory-mapped I/O for efficiency
+- 96% storage reduction vs traditional methods
+
+**VirtualChunk Architecture**
+- Stores only: chunk_id, file_path, line_range, vector_offset
+- Reads text on-demand from source MD files
+- SHA256 hash for integrity validation
+- No text duplication = minimal storage
+
+### Vector Engine
+
+**Embeddings**
+- Model: sentence-transformers/all-MiniLM-L6-v2
+- Dimension: 384
+- Normalization: L2
+- Dtype: float16 (50% size reduction)
+
+**HNSW Indexing**
+- Space: cosine similarity
+- ef_construction: 200
+- M: 16
+- ef_search: 50
+- Serialization: pickle format in MP4 mdat
+
+**Performance**
+- Index build: ~30s for 50MB text
+- Query latency: 20-50ms average
+- Memory footprint: 100-200MB runtime
+
+### Retrieval
+
+**Semantic Chunking**
+- Min tokens: 150
+- Max tokens: 450
+- Overlap: 25%
+- Preserves structure (headers, lists)
+
+**Query Processing**
+- Embedding generation
+- HNSW similarity search
+- Score filtering (min_score configurable)
+- Top-K ranking (default: 8)
+
+**Advanced Features**
+- Dynamic chunking (semantic-aware)
+- Query expansion (lexical variations)
+- Multi-vector retrieval (multiple perspectives)
+- Confidence calibration (per query type)
+
+### Anti-Hallucination
+
+**Confidence Thresholds**
+- Factual: 0.78
+- Procedural: 0.72
+- Conceptual: 0.65
+- Temporal: 0.85
+
+**Abstention Policy**
+- If best_score < min_score: return "No sufficient information"
+- Never generate content without evidence
+- Explicit "NO_INFO" responses
+
+**Provenance**
+- File path
+- Line numbers (start-end)
+- Similarity score
+- Section name
+- Chunk ID
+- Snapshot hash
+
+**Audit Logging**
+- Format: JSONL
+- Location: logs/audit.jsonl
+- Fields: timestamp, query, results_count, abstained, elapsed_ms, top_score
+
+### API (MCP Protocol)
+
+**Endpoints**
+
+get_context
+```
+Input: {query, top_k, min_score}
+Output: {content, metadata: {provenance, results_count, time_ms}}
+```
+
+validate_response
+```
+Input: {candidate_text, evidence_ids}
+Output: {verified, contradictions, missing_claims}
+```
+
+index_status
+```
+Input: {}
+Output: {version, snapshot_hash, num_chunks, uptime}
+```
+
+---
+
+## v6 Features (Planned - Roadmap)
+
+### Session Memory (OpenAI Patterns)
+
+**TrimmingSession**
+- Keep last N turns verbatim
+- Configurable max_turns (default: 8)
+- Turn = user message + assistant + tools until next user
+- Use case: Independent tasks per session
+
+**SummarizingSession**
+- Compress older turns into summary
+- Keep last N turns verbatim
+- Configurable: keep_last_n_turns, context_limit
+- Use case: Long development workflows
+
+**Session Storage**
+- Format: JSONL per session
+- Location: data/sessions/{session_id}.jsonl
+- Persistence: Auto-save on each turn
+- Retention: Configurable (default: 30 days)
+
+### Code Structure Indexing
+
+**Entity Index**
+- Functions: {name, module, signature, line_range, dependencies}
+- Classes: {name, module, methods, line_range}
+- Indexing: AST parsing (Python, JS, TS)
+- Storage: JSON at data/code_index/function_map.json
+
+**Module Graph**
+- Imports/Exports tracking
+- Dependency relationships
+- Related features/tickets linking
+- Storage: JSON at data/code_index/module_graph.json
+
+**Benefits**
+- Storage efficient: Names only, not full code
+- Fast lookup: "payment function" → process_payment
+- Context linking: Related entities discovery
+
+### Contextual Query Resolution
+
+**Reference Detection**
+- Pattern matching: "that function", "the bug", "previous error"
+- Entity extraction from recent turns
+- Pronoun resolution
+
+**Entity Tracking**
+- Track mentions across turns
+- Build mention graph: entity → [turns]
+- Resolve ambiguous references
+
+**Query Expansion**
+- Concrete entity substitution
+- Context-aware reformulation
+- Expanded query generation
+
+### Development Cycle Tracking
+
+**Session Types**
+- FEATURE_IMPLEMENTATION
+- BUG_FIXING
+- CODE_REVIEW
+- REFACTORING
+- GENERAL
+
+**Session Metadata**
+- created_at, status, type
+- entities_mentioned: [function/class names]
+- files_modified: [paths]
+- commits: [hashes]
+- related_sessions: [session_ids]
+
+**Cross-Session Coordination**
+- Link related sessions
+- Shared entity tracking
+- Multi-session queries
+
+### Enhanced API (v6)
+
+**New Endpoints**
+
+sessions/create
+```
+Input: {session_type, metadata}
+Output: {session_id, created_at}
+```
+
+get_context (enhanced)
+```
+Input: {query, session_id, resolve_references}
+Output: {content, resolved_entities, session_context_used, provenance}
+```
+
+sessions/{id}/summary
+```
+Input: {}
+Output: {turns, entities_discussed, summary, status}
+```
+
+---
+
+## Technical Specifications
+
+### Storage Formats
+
+**MP4 Structure**
+- ftyp box: 12 bytes (brand: mcpv)
+- moov box: Variable (contains udta)
+  - udta box: Variable (contains mcpi)
+    - mcpi box: Compressed JSON index
+- mdat box: Variable
+  - 8 bytes: separator (vector blob size)
+  - N bytes: vector blob (float16)
+  - M bytes: HNSW index (serialized)
+
+**Session Storage (JSONL)**
+```json
+{"turn_id": 1, "role": "user", "content": "...", "timestamp": "..."}
+{"turn_id": 2, "role": "assistant", "content": "...", "metadata": {...}}
+```
+
+**Code Index (JSON)**
+```json
+{
+  "functions": [
+    {
+      "name": "process_payment",
+      "module": "payment.py",
+      "signature": "process_payment(amount, card)",
+      "line_range": [45, 78],
+      "dependencies": ["validate_card"]
+    }
+  ]
+}
+```
+
+### Performance Metrics
+
+**v5 Baseline**
+- Recall@10: 0.72
+- Precision@3: 0.72
+- Query latency: 25ms avg
+- Cost per 1K queries: $12
+- Memory usage: 150MB
+
+**v6 Projected**
+- Recall@10: 0.88 (+22%)
+- Precision@3: 0.72 (same)
+- Query latency: 30ms (+20% for session overhead)
+- Cost per 1K queries: $13 (+8% for summarization)
+- Memory usage: 200MB (+33% for session cache)
+
+**with BM25 + Cross-Encoder (future)**
+- Recall@10: 0.88
+- Precision@3: 0.92 (+28%)
+- Query latency: 75ms (+200%)
+- Cost: $14
+- Memory: 280MB
+
+### Configuration Schema
+
+**v5 Config**
+```json
+{
+  "version": "5.0.0",
+  "sources": {"allowed_files": [...]},
+  "embedding": {"model": "...", "dimension": 384},
+  "retrieval": {"top_k": 8, "min_score": 0.75},
+  "anti_hallucination": {"confidence_thresholds": {...}}
+}
+```
+
+**v6 Config (additional)**
+```json
+{
+  "session": {
+    "enabled": true,
+    "default_type": "trimming",
+    "trimming": {"max_turns": 8},
+    "summarizing": {"keep_last_n_turns": 3, "context_limit": 10}
+  },
+  "code_indexing": {
+    "enabled": true,
+    "extensions": [".py", ".js", ".ts"]
+  }
+}
+```
+
+---
+
+## Implementation Roadmap
+
+### v5.0.0 (Completed - 2025-11-18)
+- MP4 storage implementation
+- HNSW vector engine
+- Pure retrieval server
+- Anti-hallucination measures
+- Documentation
+
+### v6.0.0 (Planned - Q1 2025)
+- Session memory (trimming + summarizing)
+- Code structure indexing
+- Contextual query resolution
+- Session management API
+
+### v6.1.0 (Planned - Q2 2025)
+- BM25 hybrid search
+- Cross-encoder reranking
+- Token management
+- Performance optimizations
+
+### v6.2.0 (Planned - Q3 2025)
+- Multi-session analytics
+- Session templates
+- Advanced entity tracking
+- Knowledge graph overlay
+
+---
+
+## Testing Strategy
+
+### v5 Tests
+- Unit: MP4 creation/loading
+- Unit: Vector search accuracy
+- Unit: Virtual chunk integrity
+- Integration: Full query pipeline
+- Performance: Latency benchmarks
+
+### v6 Tests (planned)
+- Unit: Session trimming/summarizing
+- Unit: Entity extraction
+- Unit: Reference resolution
+- Integration: Multi-turn workflows
+- Performance: Session overhead
+
+---
+
+## Constraints & Limitations
+
+### v5
+- Stateless (no conversation memory)
+- Limited to 3 source files
+- No incremental reindexing
+- No multi-language embeddings
+
+### v6
+- Session storage grows linearly
+- Code indexing limited to AST-parseable languages
+- Summarization can lose details
+- Cross-session queries may be slow
+
+---
+
+## Security & Privacy
+
+### Data Handling
+- All data stays local (no external calls except embeddings)
+- MP4 files can be encrypted (AES-GCM)
+- Audit logs contain query text (PII consideration)
+- Session data persists until manual deletion
+
+### Access Control
+- No built-in auth (relies on MCP transport security)
+- File permissions control MP4/session access
+- Audit logs should be protected
+
+---
+
+## Dependencies
+
+### Core (v5)
+- numpy >= 1.21.0
+- hnswlib >= 0.7.0
+- pymp4 >= 1.4.0
+- sentence-transformers >= 2.2.0
+- tiktoken >= 0.5.0
+
+### Additional (v6)
+- aiofiles (async file I/O)
+- ast (Python code parsing)
+- No additional heavy dependencies
+
+---
+
+## Glossary
+
+**Chunk:** Segment of text with metadata and vector embedding
+
+**Virtual Chunk:** Reference to text in source file (no stored text)
+
+**Provenance:** Source metadata (file, lines, score) for retrieved content
+
+**Session:** Multi-turn conversation with persistent memory
+
+**Entity:** Named code element (function, class, variable)
+
+**Turn:** One user message + assistant response + tool calls
+
+**Abstention:** Refusal to answer when confidence is low
+
+**HNSW:** Hierarchical Navigable Small World (ANN algorithm)
+
+**MP4/ISO BMFF:** ISO Base Media File Format (container)
+
+---
+
+## References
+
+- OpenAI Context Engineering Guide (docs/OpenAI_Guide_Context_Engineering.pdf)
+- MCP Protocol Specification 2024-11-05
+- HNSW Paper: https://arxiv.org/abs/1603.09320
+- Sentence Transformers: https://www.sbert.net/
+
+---
+
+**Status:** v5 Production Ready | v6 Roadmap Defined | Active Development
+
 
 ## Reglas Obligatorias
 

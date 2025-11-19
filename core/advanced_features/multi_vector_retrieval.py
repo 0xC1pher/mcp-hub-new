@@ -151,17 +151,21 @@ class MultiVectorEmbedder:
         if metadata:
             context_features = []
 
-            # Información de archivo
-            if 'file_type' in metadata:
-                context_features.append(hash(metadata['file_type']) % 1000)
+            file_type = metadata.get('file_type')
+            if file_type:
+                context_features.append(hash(file_type) % 1000)
 
-            # Información temporal
-            if 'timestamp' in metadata:
-                context_features.append(metadata['timestamp'] % 1000)
+            timestamp = metadata.get('timestamp')
+            if isinstance(timestamp, (int, float)) and timestamp:
+                context_features.append(int(timestamp) % 1000)
 
-            # Información de tamaño
-            if 'size' in metadata:
-                context_features.append(metadata['size'] % 1000)
+            size = metadata.get('size')
+            if isinstance(size, (int, float)) and size > 0:
+                context_features.append(int(size) % 1000)
+
+            domain = metadata.get('domain')
+            if domain:
+                context_features.append(hash(str(domain)) % 1000)
 
             # Rellenar características contextuales
             start_idx = len(base_embedding)
