@@ -7,26 +7,6 @@ No business logic - only context retrieval
 import json
 import sys
 import logging
-import time
-import hashlib
-from pathlib import Path
-from typing import Dict, Any, List, Optional
-from datetime import datetime
-
-# Setup logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
-
-# Path setup
-current_dir = Path(__file__).resolve().parent
-mcp_hub_root = current_dir.parent
-sys.path.insert(0, str(mcp_hub_root))
-sys.path.insert(0, str(current_dir))
-
-# Import storage components
 from storage import MP4Storage, VirtualChunk, VectorEngine
 
 # Import advanced features (preserved from v4)
