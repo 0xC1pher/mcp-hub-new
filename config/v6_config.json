@@ -1,0 +1,61 @@
+{
+    "version": "6.0.0",
+    "protocol_version": "2024-11-05",
+    "server_info": {
+        "name": "mcp-hub-v6",
+        "description": "MCP Server v6 - Memory, Context & TOON"
+    },
+    "sources": {
+        "allowed_files": [
+            "model.md",
+            "checklist.md",
+            "changelog.md",
+            "feature.md"
+        ],
+        "base_path": "."
+    },
+    "storage": {
+        "mp4_path": "data/context_vectors.mp4",
+        "snapshot_format": "context_vectors-{timestamp}.mp4"
+    },
+    "embedding": {
+        "model": "sentence-transformers/all-MiniLM-L6-v2",
+        "dimension": 384,
+        "normalize": true,
+        "dtype": "float16"
+    },
+    "chunking": {
+        "min_tokens": 150,
+        "max_tokens": 450,
+        "overlap_percent": 25,
+        "preserve_structure": true
+    },
+    "retrieval": {
+        "top_k": 8,
+        "rerank_top": 3,
+        "min_score": 0.75,
+        "use_hybrid": true,
+        "hybrid_alpha": 0.7
+    },
+    "anti_hallucination": {
+        "confidence_thresholds": {
+            "factual": 0.78,
+            "procedural": 0.72,
+            "conceptual": 0.65,
+            "temporal": 0.85
+        },
+        "provenance_required": true,
+        "validation_enabled": true,
+        "abstention_enabled": true
+    },
+    "hnsw": {
+        "ef_construction": 200,
+        "M": 16,
+        "ef_search": 50
+    },
+    "logging": {
+        "level": "INFO",
+        "audit_queries": true,
+        "audit_path": "logs/audit.jsonl"
+    }
+}

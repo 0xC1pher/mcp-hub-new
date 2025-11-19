@@ -45,7 +45,7 @@ class MCPServerV6:
         logger.info("Initializing MCP Server v6.0.0...")
         
         # 1. Load Config
-        self.config_path = mcp_hub_root / "config" / "v5_config.json"
+        self.config_path = mcp_hub_root / "config" / "v6_config.json"
         with open(self.config_path, 'r') as f:
             self.config = json.load(f)
             
